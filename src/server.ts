@@ -20,15 +20,14 @@ app.use(helmet());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(express.json());
 
-app.use(notFound);
-app.use(errorHandler);
-
 // Import routes
 app.use('/auth', authRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 
 connectToMongoDB()
   .then(() => app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`)))
   .catch((err) => {
     console.error('❌ MongoDB connection failed:', err);
-    process.exit(1);
   });
