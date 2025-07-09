@@ -8,7 +8,6 @@ export async function registerUser(email: string, password: string, name: string
   if (existingUser) {
     throw new Error("User already exists");
   }
-
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = new User({ email, password: hashedPassword, name });
   await user.save();
@@ -28,3 +27,8 @@ export async function loginUser(email: string, password: string): Promise<{ user
   const token = generateToken(user);
   return { user, token };
 }
+
+
+
+
+

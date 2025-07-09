@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
 import { registerUser, loginUser } from '../services/authService';
+import { generateToken } from '../../middleware/auth';
 
 export async function register(req: Request, res: Response) {
   try {
     const { email, password, name } = req.body;
     const user = await registerUser(email, password, name);
-    res.status(201).json({ message: 'User registered', user: { id: user._id, email: user.email } });
+    const token = generateToken(user);
+    console.log(token)
+    res.status(201).json({ message: 'User registered', user: { id: user._id, email: user.email, token } });
   } catch (err: any) {
     res.status(400).json({ message: err.message });
   }
