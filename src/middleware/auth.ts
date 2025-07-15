@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { IUser } from '../api/types/user';
 import { JwtPayload } from '../api/types/JwtPayload';
 
@@ -20,19 +20,20 @@ export function verifyToken(token: string): JwtPayload {
 }
 
 // Middleware לאימות משתמש
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+
+export const authenticate: RequestHandler = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).json({ message: 'Missing Authorization header' });
+    res.status(401).json({ message: 'Missing Authorization header' });
+    return;
   }
 
-  const token = authHeader.split(' ')[1]; // Bearer <token>
+  const token = authHeader.split(' ')[1];
   try {
     const decoded = verifyToken(token);
-    // אפשר להרחיב את טיפוס ה־Request כדי לכלול user
     (req as any).user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Invalid token' });
+    res.status(401).json({ message: 'Invalid token' });
   }
-}
+};

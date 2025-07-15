@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import authRoutes from './routes/auth';
+import setUpRoutes from './routes/setup';
 
 import { connectToMongoDB } from './api/utils/connectToMongo';
 import corsOptions from './configs/corsOptions';
@@ -22,6 +23,7 @@ app.use(express.json());
 
 // Import routes
 app.use('/auth', authRoutes);
+app.use('/setup',setUpRoutes );
 
 app.use(notFound);
 app.use(errorHandler);

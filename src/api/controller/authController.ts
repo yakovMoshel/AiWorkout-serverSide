@@ -7,8 +7,11 @@ export async function register(req: Request, res: Response) {
     const { email, password, name } = req.body;
     const user = await registerUser(email, password, name);
     const token = generateToken(user);
-    console.log(token)
-    res.status(201).json({ message: 'User registered', user: { id: user._id, email: user.email, token } });
+    res.status(201).json({
+      message: 'User registered',
+      user: { id: user._id, email: user.email },
+      token
+    });
   } catch (err: any) {
     res.status(400).json({ message: err.message });
   }
