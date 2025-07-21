@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import {  generateWorkoutPlan } from '../services/setupService';
 
-export async function handleSetupAndPlan(req: Request, res: Response) {
+export async function handleSetupAndPlan(req: Request, res: Response ) {
   const userId = (req as any).user.id;
 
   if (!userId) {
@@ -20,17 +20,3 @@ try {
   res.status(500).json({ message: 'Failed to save data or generate workout plan' });
 }
 }
-
-
-// export async function handleWorkoutStatus(req: Request, res: Response) {
-//   const userId = (req as any).user.id;
-
-//   try {
-//     const planStatus = await getWorkoutPlanStatus(userId);
-//     console.log("Workout Plan Status:", planStatus);
-//     res.status(200).json({ workoutPlan: planStatus });
-//   } catch (err: any) {
-//     console.error("Workout Status Error:", err.message);
-//     res.status(500).json({ message: err.message || 'Failed to check workout plan status' });
-//   }
-// }
