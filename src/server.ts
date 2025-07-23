@@ -17,7 +17,7 @@ import cookieParser from 'cookie-parser';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(helmet());
 app.use(cookieParser());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));

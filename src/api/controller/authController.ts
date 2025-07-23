@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { loginUser, registerUser } from '../services/authService';
+import { Request, RequestHandler, Response } from 'express';
+import { getUserFromToken, loginUser, registerUser } from '../services/authService';
 import { sendTokenAsCookie } from '../../middleware/auth';
 
 export async function register(req: Request, res: Response) {
@@ -36,3 +36,21 @@ export async function logout(req: Request, res: Response) {
   res.json({ message: 'Logged out successfully' });
 }
 
+
+export const getAuthenticatedUser: RequestHandler = async (req, res) => {
+  try {
+    const token = req.cookies?.token;
+    if (!token) {
+      res.status(401).json({ message: 'No token found' });
+      return;
+    }
+    const user = await getUserFromToken(token);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+    res.status(200).json({ user });
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};

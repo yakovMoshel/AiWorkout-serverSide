@@ -1,5 +1,6 @@
-import { generateToken } from '../../middleware/auth';
+import { generateToken, verifyToken } from '../../middleware/auth';
 import User from '../models/user';
+import { JwtPayload } from '../types/JwtPayload';
 import { IUser } from '../types/user';
 import bcrypt from 'bcryptjs';
 
@@ -17,7 +18,6 @@ export async function registerUser(
   await user.save();
 
   const token = generateToken(user);
-  console.log(`User registered: ${user.email}, Token: ${token}`);
   return { user, token };
 }
 
@@ -36,11 +36,14 @@ export async function loginUser(
   }
 
   const token = generateToken(user);
-    console.log(`User registered: ${user.email}, Token: ${token}`);
   return { user, token };
 }
 
-
+export async function getUserFromToken(token: string) {
+  const decoded = verifyToken(token) as JwtPayload;
+  const user = await User.findById(decoded.id).select('id name email');
+  return user;
+}
 
 
 
