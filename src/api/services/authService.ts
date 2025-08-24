@@ -29,6 +29,7 @@ export async function loginUser(
   if (!user) {
     throw new Error('Invalid credentials');
   }
+  console.log(user);
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
