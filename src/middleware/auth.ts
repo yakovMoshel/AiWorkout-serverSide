@@ -1,15 +1,18 @@
 import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import {  Response,  RequestHandler } from 'express';
 import { IUser } from '../api/types/user';
 import { JwtPayload } from '../api/types/JwtPayload';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'abctesttoken';
+const JWTSECRET = process.env.JWT_SECRET;
 
 // יצירת טוקן
 export function generateToken(user: IUser) {
+  if (!JWTSECRET) {
+    throw new Error('JWT_SECRET environment variable is not defined');
+  }
   return jwt.sign(
     { id: user._id, email: user.email },
-    JWT_SECRET,
+    JWTSECRET,
     { expiresIn: '1h' }
   );
 }
@@ -26,7 +29,10 @@ export function sendTokenAsCookie(res: Response, token: string) {
 
 // אימות טוקן
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  if (!JWTSECRET) {
+    throw new Error('JWT_SECRET environment variable is not defined');
+  }
+  return jwt.verify(token, JWTSECRET) as JwtPayload;
 }
 
 export const authenticate: RequestHandler = (req, res, next) => {

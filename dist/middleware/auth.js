@@ -8,10 +8,13 @@ exports.generateToken = generateToken;
 exports.sendTokenAsCookie = sendTokenAsCookie;
 exports.verifyToken = verifyToken;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const JWT_SECRET = process.env.JWT_SECRET || 'abctesttoken';
+const JWTSECRET = process.env.JWT_SECRET;
 // יצירת טוקן
 function generateToken(user) {
-    return jsonwebtoken_1.default.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    if (!JWTSECRET) {
+        throw new Error('JWT_SECRET environment variable is not defined');
+    }
+    return jsonwebtoken_1.default.sign({ id: user._id, email: user.email }, JWTSECRET, { expiresIn: '1h' });
 }
 // שליחת טוקן כ-cookie
 function sendTokenAsCookie(res, token) {
@@ -24,7 +27,10 @@ function sendTokenAsCookie(res, token) {
 }
 // אימות טוקן
 function verifyToken(token) {
-    return jsonwebtoken_1.default.verify(token, JWT_SECRET);
+    if (!JWTSECRET) {
+        throw new Error('JWT_SECRET environment variable is not defined');
+    }
+    return jsonwebtoken_1.default.verify(token, JWTSECRET);
 }
 const authenticate = (req, res, next) => {
     const token = req.cookies?.token;

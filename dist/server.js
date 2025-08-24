@@ -17,7 +17,7 @@ const errorHandler_1 = require("./middleware/errorHandler");
 const notFound_1 = require("./middleware/notFound");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 app.use((0, cors_1.default)(corsOptions_1.default));
 app.use((0, helmet_1.default)());
 app.use((0, cookie_parser_1.default)());

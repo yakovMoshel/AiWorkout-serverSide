@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
@@ -15,9 +15,9 @@ import { notFound } from './middleware/notFound';
 import cookieParser from 'cookie-parser';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
-app.options('*', cors(corsOptions));
+app.use(cors(corsOptions) as RequestHandler);
 app.use(helmet());
 app.use(cookieParser());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));

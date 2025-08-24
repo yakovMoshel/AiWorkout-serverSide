@@ -18,7 +18,6 @@ async function registerUser(email, password, name) {
     const user = new user_1.default({ email, password: hashedPassword, name });
     await user.save();
     const token = (0, auth_1.generateToken)(user);
-    console.log(`User registered: ${user.email}, Token: ${token}`);
     return { user, token };
 }
 async function loginUser(email, password) {
@@ -31,12 +30,10 @@ async function loginUser(email, password) {
         throw new Error('Invalid credentials');
     }
     const token = (0, auth_1.generateToken)(user);
-    console.log(`User registered: ${user.email}, Token: ${token}`);
     return { user, token };
 }
 async function getUserFromToken(token) {
     const decoded = (0, auth_1.verifyToken)(token);
     const user = await user_1.default.findById(decoded.id).select('id name email');
-    console.log(`User fetched from token: ${user?.email}`);
     return user;
 }

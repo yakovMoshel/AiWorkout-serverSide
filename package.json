@@ -14,6 +14,7 @@
   "dependencies": {
     "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "cros": "^1.1.0",
     "dotenv": "^16.5.0",
@@ -22,10 +23,12 @@
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.0"
+    "mongoose": "^8.15.0",
+    "path-to-regexp": "^8.2.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.9",
