@@ -25,7 +25,6 @@ async function loginUser(email, password) {
     if (!user) {
         throw new Error('Invalid credentials');
     }
-    console.log(user);
     const isMatch = await bcryptjs_1.default.compare(password, user.password);
     if (!isMatch) {
         throw new Error('Invalid credentials');
@@ -35,6 +34,14 @@ async function loginUser(email, password) {
 }
 async function getUserFromToken(token) {
     const decoded = (0, auth_1.verifyToken)(token);
-    const user = await user_1.default.findById(decoded.id).select('id name email');
-    return user;
+    const user = await user_1.default.findById(decoded.id);
+    if (!user)
+        return null;
+    return {
+        name: user.name,
+        age: user.age,
+        goal: user.goal,
+        height: user.height,
+        weight: user.weight
+    };
 }

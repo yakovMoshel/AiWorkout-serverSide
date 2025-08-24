@@ -29,7 +29,6 @@ export async function loginUser(
   if (!user) {
     throw new Error('Invalid credentials');
   }
-  console.log(user);
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
@@ -42,8 +41,15 @@ export async function loginUser(
 
 export async function getUserFromToken(token: string) {
   const decoded = verifyToken(token) as JwtPayload;
-  const user = await User.findById(decoded.id).select('id name email');
-  return user;
+  const user = await User.findById(decoded.id);
+  if (!user) return null;
+  return {
+    name: user.name,
+    age: user.age,
+    goal: user.goal,
+    height: user.height,
+    weight: user.weight
+  };
 }
 
 

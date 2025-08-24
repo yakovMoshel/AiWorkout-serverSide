@@ -24,14 +24,7 @@ export async function login(req: Request, res: Response) {
     sendTokenAsCookie(res, token);
     res.json({
       message: 'Login successful',
-      user: {
-        email: user.email,
-        name: user.name,
-        age: user.age,
-        weight: user.weight,
-        height: user.height,
-        goal: user.goal
-      },
+      user: { email: user.email, name: user.name },
     });
   } catch (err: any) {
     res.status(401).json({ message: err.message });
