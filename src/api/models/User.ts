@@ -12,10 +12,13 @@ const userSchema = new mongoose.Schema<IUser>({
   height: { type: Number },
   weight: { type: Number },
   goal: { type: String },
+  image: { type: String },
   experience: { type: String },
   trainingDays: [{ type: String }],
   healthNotes: { type: String },
-
+  preferences: [{ type: String }],
+  sessionDuration: { type: Number },
+  planDurationWeeks: { type: Number },
   workoutPlan: { type: mongoose.Schema.Types.Mixed }
 });
 

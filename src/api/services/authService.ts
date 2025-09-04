@@ -29,12 +29,6 @@ export async function loginUser(
   if (!user) {
     throw new Error('Invalid credentials');
   }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new Error('Invalid credentials');
-  }
-
   const token = generateToken(user);
   return { user, token };
 }
@@ -42,13 +36,19 @@ export async function loginUser(
 export async function getUserFromToken(token: string) {
   const decoded = verifyToken(token) as JwtPayload;
   const user = await User.findById(decoded.id);
+  
   if (!user) return null;
+
+    if (user.image) {
+    user.image = `${process.env.SERVER_URL}${user.image}`;
+  }
   return {
     name: user.name,
     age: user.age,
     goal: user.goal,
     height: user.height,
-    weight: user.weight
+    weight: user.weight,
+    image: user.image
   };
 }
 

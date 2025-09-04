@@ -20,8 +20,8 @@ function generateToken(user) {
 function sendTokenAsCookie(res, token) {
     res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: process.env.NODE_ENV !== 'production' ? true : process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV !== 'production' ? 'none' : 'lax',
         maxAge: 1000 * 60 * 60,
     });
 }
@@ -36,7 +36,7 @@ const authenticate = (req, res, next) => {
     const token = req.cookies?.token;
     if (!token) {
         res.status(401).json({ message: 'Missing authentication token' });
-        return; // לא מחזיר response - רק עוצר כאן
+        return;
     }
     try {
         const decoded = verifyToken(token);

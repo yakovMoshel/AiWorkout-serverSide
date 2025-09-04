@@ -7,12 +7,14 @@ import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import authRoutes from './routes/auth';
 import setUpRoutes from './routes/setup';
+import profileRoutes from './routes/profile';
 
 import { connectToMongoDB } from './api/utils/connectToMongo';
 import corsOptions from './configs/corsOptions';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import cookieParser from 'cookie-parser';
+
 
 const app = express();
 const PORT = process.env.PORT;
@@ -22,10 +24,17 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(express.json());
-
+app.use(
+  "/uploads",
+  cors({ origin: process.env.FRONTEND_DEV, credentials: true }),
+  express.static("uploads")
+);
 // Import routes
+
+
 app.use('/auth', authRoutes);
-app.use('/setup',setUpRoutes );
+app.use('/setup', setUpRoutes);
+app.use('/profile', profileRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

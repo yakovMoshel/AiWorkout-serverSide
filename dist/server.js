@@ -11,6 +11,7 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const cors_1 = __importDefault(require("cors"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const setup_1 = __importDefault(require("./routes/setup"));
+const profile_1 = __importDefault(require("./routes/profile"));
 const connectToMongo_1 = require("./api/utils/connectToMongo");
 const corsOptions_1 = __importDefault(require("./configs/corsOptions"));
 const errorHandler_1 = require("./middleware/errorHandler");
@@ -23,9 +24,11 @@ app.use((0, helmet_1.default)());
 app.use((0, cookie_parser_1.default)());
 app.use((0, express_rate_limit_1.default)({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(express_1.default.json());
+app.use("/uploads", (0, cors_1.default)({ origin: process.env.FRONTEND_DEV, credentials: true }), express_1.default.static("uploads"));
 // Import routes
 app.use('/auth', auth_1.default);
 app.use('/setup', setup_1.default);
+app.use('/profile', profile_1.default);
 app.use(notFound_1.notFound);
 app.use(errorHandler_1.errorHandler);
 (0, connectToMongo_1.connectToMongoDB)()

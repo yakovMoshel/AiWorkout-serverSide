@@ -21,6 +21,14 @@ exports.signupValidation = [
         .trim()
         .isLength({ min: 5 })
         .withMessage("Password must be at least 5 characters long."),
+    (0, express_validator_1.body)("confirmPassword")
+        .trim()
+        .custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error("Passwords do not match.");
+        }
+        return true;
+    }),
     (0, express_validator_1.body)("name")
         .trim()
         .not()

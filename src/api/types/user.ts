@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IUser extends Document {
-  _id: mongoose.Schema.Types.ObjectId; 
+  _id: mongoose.Schema.Types.ObjectId;
   name: string;
   email: string;
   password: string;
@@ -13,5 +13,9 @@ export interface IUser extends Document {
   experience?: string;
   trainingDays?: string[];
   healthNotes?: string;
-  workoutPlan?: any; 
+  workoutPlan?: any;
+  preferences?: string[];
+  sessionDuration?: number;
+  planDurationWeeks?: number;
+  image?: string;
 }

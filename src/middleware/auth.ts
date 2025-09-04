@@ -21,8 +21,8 @@ export function generateToken(user: IUser) {
 export function sendTokenAsCookie(res: Response, token: string) {
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV !== 'production' ? true : process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV !== 'production' ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60,
   });
 }
@@ -40,7 +40,7 @@ export const authenticate: RequestHandler = (req, res, next) => {
 
   if (!token) {
     res.status(401).json({ message: 'Missing authentication token' });
-    return; // לא מחזיר response - רק עוצר כאן
+    return;
   }
 
   try {

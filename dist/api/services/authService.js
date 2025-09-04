@@ -25,10 +25,6 @@ async function loginUser(email, password) {
     if (!user) {
         throw new Error('Invalid credentials');
     }
-    const isMatch = await bcryptjs_1.default.compare(password, user.password);
-    if (!isMatch) {
-        throw new Error('Invalid credentials');
-    }
     const token = (0, auth_1.generateToken)(user);
     return { user, token };
 }
@@ -37,11 +33,15 @@ async function getUserFromToken(token) {
     const user = await user_1.default.findById(decoded.id);
     if (!user)
         return null;
+    if (user.image) {
+        user.image = `${process.env.SERVER_URL}${user.image}`;
+    }
     return {
         name: user.name,
         age: user.age,
         goal: user.goal,
         height: user.height,
-        weight: user.weight
+        weight: user.weight,
+        image: user.image
     };
 }

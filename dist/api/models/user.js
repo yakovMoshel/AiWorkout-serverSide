@@ -14,9 +14,13 @@ const userSchema = new mongoose_1.default.Schema({
     height: { type: Number },
     weight: { type: Number },
     goal: { type: String },
+    image: { type: String },
     experience: { type: String },
     trainingDays: [{ type: String }],
     healthNotes: { type: String },
+    preferences: [{ type: String }],
+    sessionDuration: { type: Number },
+    planDurationWeeks: { type: Number },
     workoutPlan: { type: mongoose_1.default.Schema.Types.Mixed }
 });
 exports.default = mongoose_1.default.model('User', userSchema);

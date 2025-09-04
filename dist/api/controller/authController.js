@@ -1,14 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAuthenticatedUser = void 0;
-exports.register = register;
-exports.login = login;
-exports.logout = logout;
+exports.getAuthenticatedUser = exports.logout = exports.login = exports.register = void 0;
 const authService_1 = require("../services/authService");
 const auth_1 = require("../../middleware/auth");
-async function register(req, res) {
-    const { email, password, name } = req.body;
+const express_validator_1 = require("express-validator");
+const register = async (req, res, next) => {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        res.status(422).json({ errors: errors.array() });
+        return;
+    }
     try {
+        const { email, password, name } = req.body;
         const { user, token } = await (0, authService_1.registerUser)(email, password, name);
         (0, auth_1.sendTokenAsCookie)(res, token);
         res.status(201).json({
@@ -17,12 +20,18 @@ async function register(req, res) {
         });
     }
     catch (err) {
-        res.status(400).json({ message: err.message });
+        next(err);
     }
-}
-async function login(req, res) {
-    const { email, password } = req.body;
+};
+exports.register = register;
+const login = async (req, res, next) => {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        res.status(422).json({ errors: errors.array() });
+        return;
+    }
     try {
+        const { email, password } = req.body;
         const { user, token } = await (0, authService_1.loginUser)(email, password);
         (0, auth_1.sendTokenAsCookie)(res, token);
         res.json({
@@ -31,14 +40,16 @@ async function login(req, res) {
         });
     }
     catch (err) {
-        res.status(401).json({ message: err.message });
+        next(err);
     }
-}
-async function logout(req, res) {
+};
+exports.login = login;
+const logout = (req, res) => {
     res.clearCookie('token');
     res.json({ message: 'Logged out successfully' });
-}
-const getAuthenticatedUser = async (req, res) => {
+};
+exports.logout = logout;
+const getAuthenticatedUser = async (req, res, next) => {
     try {
         const token = req.cookies?.token;
         if (!token) {
@@ -53,7 +64,7 @@ const getAuthenticatedUser = async (req, res) => {
         res.status(200).json({ user });
     }
     catch (err) {
-        res.status(401).json({ message: 'Invalid or expired token' });
+        next(err);
     }
 };
 exports.getAuthenticatedUser = getAuthenticatedUser;

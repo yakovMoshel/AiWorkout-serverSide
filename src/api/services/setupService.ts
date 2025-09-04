@@ -34,28 +34,11 @@ export async function generateWorkoutPlan(
     planDurationWeeks = 8,
   } = formData;
 
-  // עדכון פרטי המשתמש
-  const user = await User.findByIdAndUpdate(
-    userId,
-    {
-      gender,
-      age,
-      height,
-      weight,
-      goal,
-      experience,
-      trainingDays,
-      healthNotes,
-      preferences,
-      sessionDuration,
-      planDurationWeeks,
-    },
-    { new: true }
-  );
-
+  // Get user first
+  const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
-  // קריאה ל-API החיצוני לפי הדוקומנטציה
+  // Call external API first
   const options = {
     method: 'POST',
     url: 'https://ai-workout-planner-exercise-fitness-nutrition-guide.p.rapidapi.com/generateWorkoutPlan',
@@ -82,7 +65,18 @@ export async function generateWorkoutPlan(
   const response = await axios.request(options);
   const workoutPlan = response.data;
 
-  // שמירה במסד הנתונים
+  // Only if API succeeded, update profile and plan together
+  user.gender = gender;
+  user.age = age;
+  user.height = height;
+  user.weight = weight;
+  user.goal = goal;
+  user.experience = experience;
+  user.trainingDays = trainingDays;
+  user.healthNotes = healthNotes;
+  user.preferences = preferences;
+  user.sessionDuration = sessionDuration;
+  user.planDurationWeeks = planDurationWeeks;
   user.workoutPlan = workoutPlan;
   await user.save();
 

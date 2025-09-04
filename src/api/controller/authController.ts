@@ -1,43 +1,57 @@
-import { Request, RequestHandler, Response } from 'express';
+
+import { Request, RequestHandler, Response, NextFunction } from 'express';
 import { getUserFromToken, loginUser, registerUser } from '../services/authService';
 import { sendTokenAsCookie } from '../../middleware/auth';
+import { validationResult } from "express-validator";
 
-export async function register(req: Request, res: Response) {
-  const { email, password, name } = req.body;
+export const register: RequestHandler = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json({ errors: errors.array() });
+    return;
+  }
   try {
+    const { email, password, name } = req.body;
     const { user, token } = await registerUser(email, password, name);
     sendTokenAsCookie(res, token);
     res.status(201).json({
       message: 'User registered successfully',
       user: { email: user.email, name: user.name },
     });
-  } catch (err: any) {
-    res.status(400).json({ message: err.message });
+  } catch (err) {
+    next(err);
   }
-}
+};
 
-export async function login(req: Request, res: Response) {
-  const { email, password } = req.body;
 
+export const login: RequestHandler = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json({ errors: errors.array() });
+    return;
+  }
   try {
+    const { email, password } = req.body;
     const { user, token } = await loginUser(email, password);
     sendTokenAsCookie(res, token);
     res.json({
       message: 'Login successful',
       user: { email: user.email, name: user.name },
     });
-  } catch (err: any) {
-    res.status(401).json({ message: err.message });
+  } catch (err) {
+    next(err);
   }
-}
+};
 
-export async function logout(req: Request, res: Response) {
+
+export const logout: RequestHandler = (req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out successfully' });
-}
+};
 
 
-export const getAuthenticatedUser: RequestHandler = async (req, res) => {
+
+export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
   try {
     const token = req.cookies?.token;
     if (!token) {
@@ -51,6 +65,6 @@ export const getAuthenticatedUser: RequestHandler = async (req, res) => {
     }
     res.status(200).json({ user });
   } catch (err) {
-    res.status(401).json({ message: 'Invalid or expired token' });
+    next(err);
   }
 };
