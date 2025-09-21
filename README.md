@@ -12,7 +12,7 @@ npm install
 ## Run
 
 ```bash
-npm run start
+npm start
 ```
 
 ## Required Variables
