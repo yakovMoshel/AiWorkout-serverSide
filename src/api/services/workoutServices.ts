@@ -1,4 +1,4 @@
-import User from '../models/user';
+import User from '../models/User';
 import { IUser } from '../types/user';
 
 export async function fetchUserWorkoutPlan(userId: string): Promise<IUser['workoutPlan']> {
