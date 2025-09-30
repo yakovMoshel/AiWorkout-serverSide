@@ -18,9 +18,10 @@ export const register: RequestHandler = async (req, res, next) => {
       message: 'User registered successfully',
       user: { email: user.email, name: user.name },
     });
-  } catch (err) {
-    next(err);
-  }
+  } catch (err: any) {
+  const status = err.status || 500;
+  res.status(status).json({ message: err.message });
+}
 };
 
 
@@ -38,9 +39,10 @@ export const login: RequestHandler = async (req, res, next) => {
       message: 'Login successful',
       user: { email: user.email, name: user.name },
     });
-  } catch (err) {
-    next(err);
-  }
+  }catch (err: any) {
+  const status = err.status || 500;
+  res.status(status).json({ message: err.message });
+}
 };
 
 

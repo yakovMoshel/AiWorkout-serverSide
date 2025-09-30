@@ -3,16 +3,20 @@ import {  Response,  RequestHandler } from 'express';
 import { IUser } from '../api/types/user';
 import { JwtPayload } from '../api/types/JwtPayload';
 
-const JWTSECRET = process.env.JWT_SECRET;
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET environment variable is not defined");
+  }
+  return secret;
+}
 
 // יצירת טוקן
 export function generateToken(user: IUser) {
-  if (!JWTSECRET) {
-    throw new Error('JWT_SECRET environment variable is not defined');
-  }
+ 
   return jwt.sign(
     { id: user._id, email: user.email },
-    JWTSECRET,
+     getJwtSecret(),
     { expiresIn: '1h' }
   );
 }
@@ -29,10 +33,7 @@ export function sendTokenAsCookie(res: Response, token: string) {
 
 // אימות טוקן
 export function verifyToken(token: string): JwtPayload {
-  if (!JWTSECRET) {
-    throw new Error('JWT_SECRET environment variable is not defined');
-  }
-  return jwt.verify(token, JWTSECRET) as JwtPayload;
+  return jwt.verify(token, getJwtSecret()) as JwtPayload;
 }
 
 export const authenticate: RequestHandler = (req, res, next) => {

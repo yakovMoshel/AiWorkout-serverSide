@@ -1,5 +1,8 @@
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+
+const envFile = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
 import express, { RequestHandler } from 'express';
 import helmet from 'helmet';
@@ -14,11 +17,13 @@ import corsOptions from './configs/corsOptions';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import cookieParser from 'cookie-parser';
-import path from 'path';
 
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT;
+
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
 
 app.use(cors(corsOptions) as RequestHandler);
 app.use(
@@ -50,8 +55,10 @@ app.use('/profile', profileRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-connectToMongoDB()
-  .then(() => app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`)))
-  .catch((err) => {
-    console.error('❌ MongoDB connection failed:', err);
+if (process.env.NODE_ENV !== "test") {
+  connectToMongoDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
+    });
   });
+}
