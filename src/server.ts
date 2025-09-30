@@ -12,7 +12,7 @@ import authRoutes from './routes/auth';
 import setUpRoutes from './routes/setup';
 import profileRoutes from './routes/profile';
 
-import { connectToMongoDB } from './api/utils/connectToMongo';
+import { connectToMongoDB } from './api/utils/ConnectToMongo';
 import corsOptions from './configs/corsOptions';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
