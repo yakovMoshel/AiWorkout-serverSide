@@ -1,4 +1,4 @@
-name: Server CI - Lint, Test
+name: Server CI - Lint, Test, Deploy to S3
 
 on:
   push:
@@ -46,3 +46,13 @@ jobs:
 
       - name: Run tests
         run: npm run test
+
+  Deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to AWS S3
+        uses: ./.github/actions/deploy-s3-javaScript        
