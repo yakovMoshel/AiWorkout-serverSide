@@ -56,3 +56,9 @@ jobs:
 
       - name: Deploy to AWS S3
         uses: ./.github/actions/deploy-s3-javaScript        
+
+  infoormation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run custom action
+        uses: ./.github/actions/deploy-s3-javaScript      
