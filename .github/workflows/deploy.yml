@@ -11,7 +11,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    continue-on-error: true 
+    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,21 +47,17 @@ jobs:
       - name: Run tests
         run: npm run test
 
-  Deploy:
+  deploy:
     runs-on: ubuntu-latest
     needs: test
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install dependencies for deploy action
+        run: |
+          cd .github/actions/deploy-s3-javaScript
+          npm ci
+
       - name: Deploy to AWS S3
-        uses: ./.github/actions/deploy-s3-javaScript        
-
-  infoormation:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Run custom action
-        uses: ./.github/actions/deploy-s3-javaScript      
+        run: ./.github/actions/deploy-s3-javaScript
