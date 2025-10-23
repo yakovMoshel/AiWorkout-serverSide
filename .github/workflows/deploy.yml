@@ -1,4 +1,4 @@
-name: Server CI - Lint, Test, Deploy to S3
+name: Server CI - Lint, Test, Deploy to EC2
 
 on:
   push:
@@ -53,14 +53,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy to AWS S3
-        uses: ./.github/actions/deploy-s3-javaScript
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
 
-  information:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ec2-user/app || mkdir app && cd app
+            
+            git pull origin main || git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+            
+            cat > .env <<EOL
+MONGO_URI=${{ secrets.MONGO_URI }}
+PORT=${{ secrets.PORT }}
+RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
+FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
+SERVER_URL=${{ secrets.SERVER_URL }}
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+EOL
 
-      - name: Run custom action for info
-        uses: ./.github/actions/deploy-s3-javaScript
+            npm install
+            
+            pm2 restart all || pm2 start src/server.ts --name "aiworkout-server"
+          EOF
