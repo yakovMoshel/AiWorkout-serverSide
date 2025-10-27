@@ -46,32 +46,32 @@ jobs:
       - name: Run tests
         run: npm run test
 
-deploy:
-  runs-on: ubuntu-latest
-  needs: test
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up SSH key
-      run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
 
-    - name: Deploy to EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << EOF
-          mkdir -p /home/ec2-user/app
-          cd /home/ec2-user/app
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            mkdir -p /home/ec2-user/app
+            cd /home/ec2-user/app
 
-          if [ -d ".git" ]; then
-            git reset --hard
-            git pull origin main
-          else
-            git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
-          fi
+            if [ -d ".git" ]; then
+              git reset --hard
+              git pull origin main
+            else
+              git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+            fi
 
-          cat > .env <<EOL
+            cat > .env <<EOL
 MONGO_URI=${{ secrets.MONGO_URI }}
 PORT=${{ secrets.PORT }}
 RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
@@ -80,7 +80,6 @@ SERVER_URL=${{ secrets.SERVER_URL }}
 JWT_SECRET=${{ secrets.JWT_SECRET }}
 EOL
 
-          npm ci
-
-          pm2 restart all || pm2 start src/server.ts --name "aiworkout-server"
-        EOF
+            npm ci
+            pm2 restart all || pm2 start src/server.ts --name "aiworkout-server"
+          EOF
