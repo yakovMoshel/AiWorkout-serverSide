@@ -46,7 +46,7 @@ jobs:
       - name: Run tests
         run: npm run test
 
-    deploy:
+deploy:
   runs-on: ubuntu-latest
   needs: test
   steps:
@@ -60,19 +60,27 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-          cd /home/ec2-user/app || mkdir app && cd app
-          git pull origin main || git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << EOF
+          mkdir -p /home/ec2-user/app
+          cd /home/ec2-user/app
+
+          if [ -d ".git" ]; then
+            git reset --hard
+            git pull origin main
+          else
+            git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+          fi
 
           cat > .env <<EOL
-        MONGO_URI=${{ secrets.MONGO_URI }}
-        PORT=${{ secrets.PORT }}
-        RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
-        FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
-        SERVER_URL=${{ secrets.SERVER_URL }}
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
-         EOL
+MONGO_URI=${{ secrets.MONGO_URI }}
+PORT=${{ secrets.PORT }}
+RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
+FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
+SERVER_URL=${{ secrets.SERVER_URL }}
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+EOL
 
-          npm install
+          npm ci
+
           pm2 restart all || pm2 start src/server.ts --name "aiworkout-server"
         EOF
