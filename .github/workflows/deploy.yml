@@ -53,56 +53,43 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: server-build
-
       - name: Set up SSH key
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-      - name: Upload and Run Deploy Script on EC2
+      - name: Deploy to EC2
         run: |
-          echo '#!/bin/bash
-          set -e
-          mkdir -p /home/ec2-user/app
-          cd /home/ec2-user/app
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+            mkdir -p /home/ec2-user/app
+            cd /home/ec2-user/app
 
-          if [ -d ".git" ]; then
-            echo "🔄 Updating existing repository..."
-            git reset --hard
-            git pull origin main
-          else
-            echo "📦 Cloning repository..."
-            git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
-          fi
+            if [ -d ".git" ]; then
+              echo "🔄 Updating existing repository..."
+              git reset --hard
+              git pull origin main
+            else
+              echo "📦 Cloning repository..."
+              git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+            fi
 
-          echo "🧩 Creating .env file..."
-          cat > .env <<EOF
-          MONGO_URI=${{ secrets.MONGO_URI }}
-          PORT=${{ secrets.PORT }}
-          RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
-          FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
-          SERVER_URL=${{ secrets.SERVER_URL }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
+            echo "🧩 Creating .env file..."
+            cat > .env <<EOL
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            PORT=${{ secrets.PORT }}
+            RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
+            FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
+            SERVER_URL=${{ secrets.SERVER_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            EOL
+
+            echo "📦 Installing dependencies..."
+            npm ci
+
+            echo "🏗️ Building project..."
+            npm run build
+
+            echo "🚀 Restarting application with PM2..."
+            pm2 restart all || pm2 start dist/server.js --name "aiworkout-server"
           EOF
-
-          echo "📦 Installing dependencies..."
-          npm ci
-
-          echo "🏗️ Building project..."
-          npm run build
-
-          echo "🚀 Restarting application with PM2..."
-          pm2 restart all || pm2 start dist/server.js --name "aiworkout-server"
-          ' > deploy.sh
-
-          chmod +x deploy.sh
-
-          echo "📤 Uploading deploy script to EC2..."
-          scp -i private_key.pem -o StrictHostKeyChecking=no deploy.sh ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/deploy.sh
-
-          echo "🏃 Running deploy script on EC2..."
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} 'bash /home/ec2-user/deploy.sh'
