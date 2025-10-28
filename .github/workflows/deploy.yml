@@ -59,8 +59,15 @@ jobs:
           chmod 600 private_key.pem
 
       - name: Deploy to EC2
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          PORT: ${{ secrets.PORT }}
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+          FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
+          SERVER_URL: ${{ secrets.SERVER_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<'EOF'
             set -e
             mkdir -p /home/ec2-user/app
             cd /home/ec2-user/app
@@ -76,12 +83,12 @@ jobs:
 
             echo "🧩 Creating .env file..."
             cat > .env <<EOL
-            MONGO_URI=${{ secrets.MONGO_URI }}
-            PORT=${{ secrets.PORT }}
-            RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
-            FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
-            SERVER_URL=${{ secrets.SERVER_URL }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            MONGO_URI=$MONGO_URI
+            PORT=$PORT
+            RAPID_API_KEY=$RAPID_API_KEY
+            FRONTEND_DEV=$FRONTEND_DEV
+            SERVER_URL=$SERVER_URL
+            JWT_SECRET=$JWT_SECRET
             EOL
 
             echo "📦 Installing dependencies..."
