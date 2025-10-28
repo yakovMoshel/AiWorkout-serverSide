@@ -107,13 +107,13 @@ jobs:
 
           echo "🧩 Creating .env file..."
           cat > .env <<EOF
-MONGO_URI=${{ secrets.MONGO_URI }}
-PORT=${{ secrets.PORT }}
-RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
-FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
-SERVER_URL=${{ secrets.SERVER_URL }}
-JWT_SECRET=${{ secrets.JWT_SECRET }}
-EOF
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          PORT=${{ secrets.PORT }}
+          RAPID_API_KEY=${{ secrets.RAPID_API_KEY }}
+          FRONTEND_DEV=${{ secrets.FRONTEND_DEV }}
+          SERVER_URL=${{ secrets.SERVER_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          EOF
 
           echo "📦 Installing dependencies..."
           npm ci
