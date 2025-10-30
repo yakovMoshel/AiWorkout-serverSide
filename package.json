@@ -4,11 +4,11 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test vitest",
-    "test:ui": "vitest --ui",
-    "compile": "tsc",
-    "start": "ts-node-dev --respawn --transpile-only src/server.ts"
-  },
+  "test": "cross-env NODE_ENV=test vitest",
+  "test:ui": "vitest --ui",
+  "build": "tsc",
+  "start": "node dist/server.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
