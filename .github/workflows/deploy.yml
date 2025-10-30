@@ -66,64 +66,64 @@ jobs:
         run: npm run build
 
   deploy:
-  runs-on: ubuntu-latest
-  needs: build
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up SSH key
-      run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
 
-    - name: Deploy to EC2
-      env:
-        MONGO_URI: ${{ secrets.MONGO_URI }}
-        PORT: ${{ secrets.PORT }}
-        RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
-        FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
-        SERVER_URL: ${{ secrets.SERVER_URL }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      run: |
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<'EOF'
-          set -ex
+      - name: Deploy to EC2
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          PORT: ${{ secrets.PORT }}
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+          FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
+          SERVER_URL: ${{ secrets.SERVER_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<EOF
+            set -ex
 
-          mkdir -p /home/ec2-user/aiworkout-server
-          cd /home/ec2-user/aiworkout-server
+            mkdir -p /home/ec2-user/aiworkout-server
+            cd /home/ec2-user/aiworkout-server
 
-          if [ -d ".git" ]; then
-            echo "🔄 Updating existing repository..."
-            git reset --hard
-            git pull origin main
-          else
-            echo "📦 Cloning repository..."
-            git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
-          fi
+            if [ -d ".git" ]; then
+              echo "🔄 Updating existing repository..."
+              git reset --hard
+              git pull origin main
+            else
+              echo "📦 Cloning repository..."
+              git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+            fi
 
-                    echo "🧩 Creating .env file..."
-                    cat > .env <<EOL
-          MONGO_URI=${MONGO_URI}
-          PORT=${PORT}
-          RAPID_API_KEY=${RAPID_API_KEY}
-          FRONTEND_DEV=${FRONTEND_DEV}
-          SERVER_URL=${SERVER_URL}
-          JWT_SECRET=${JWT_SECRET}
-          EOL
+            echo "🧩 Creating .env file..."
+            cat > .env <<EOL
+             MONGO_URI=${MONGO_URI}
+             PORT=${PORT}
+             RAPID_API_KEY=${RAPID_API_KEY}
+             FRONTEND_DEV=${FRONTEND_DEV}
+             SERVER_URL=${SERVER_URL}
+             JWT_SECRET=${JWT_SECRET}
+             EOL
 
-                    echo "📦 Installing dependencies..."
-                    npm ci
+              echo "📦 Installing dependencies..."
+               npm ci
 
-                    echo "🏗️ Building project..."
-                    npm run build
+            echo "🏗️ Building project..."
+            npm run build
 
-                    echo "🚀 Installing PM2 if needed..."
-                    command -v pm2 >/dev/null 2>&1 || npm install -g pm2
+            echo "🚀 Installing PM2 if needed..."
+            command -v pm2 >/dev/null 2>&1 || npm install -g pm2
 
-                    echo "🔄 Starting or restarting server with PM2..."
-                    if pm2 list | grep -q aiworkout-server; then
-                      pm2 restart aiworkout-server --update-env
-                    else
-                      pm2 start dist/server.js --name "aiworkout-server" --update-env
-                    fi
+            echo "🔄 Starting or restarting server with PM2..."
+            if pm2 list | grep -q aiworkout-server; then
+              pm2 restart aiworkout-server --update-env
+            else
+              pm2 start dist/server.js --name "aiworkout-server" --update-env
+            fi
           EOF
