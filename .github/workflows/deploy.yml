@@ -1,102 +1,57 @@
-name: Server CI - Lint, Test, Build, Deploy to EC2
+deploy:
+  runs-on: ubuntu-latest
+  needs: test
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    - name: Set up SSH key
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+        chmod 600 private_key.pem
 
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Deploy to EC2
+      env:
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+        PORT: ${{ secrets.PORT }}
+        RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+        FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
+        SERVER_URL: ${{ secrets.SERVER_URL }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      run: |
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<'EOF'
+          set -ex
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+          # --- יצירת תיקייה לפרויקט אם לא קיימת ---
+          mkdir -p /home/ec2-user/aiworkout-server
+          cd /home/ec2-user/aiworkout-server
 
-      - name: Install dependencies
-        run: npm ci
+          if [ -d ".git" ]; then
+            echo "🔄 Updating existing repository..."
+            git reset --hard
+            git pull origin main
+          else
+            echo "📦 Cloning repository..."
+            git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+          fi
 
-      - name: Run ESLint
-        run: npm run lint
+          echo "🧩 Creating .env file..."
+          cat > .env <<EOL
+          MONGO_URI=$MONGO_URI
+          PORT=$PORT
+          RAPID_API_KEY=$RAPID_API_KEY
+          FRONTEND_DEV=$FRONTEND_DEV
+          SERVER_URL=$SERVER_URL
+          JWT_SECRET=$JWT_SECRET
+          EOL
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+          echo "📦 Installing dependencies..."
+          npm ci
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+          # --- Build skipped ---
+          echo "🏗️ Build skipped (not needed for this project)"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm run test
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up SSH key
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
-
-      - name: Deploy to EC2
-        env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          PORT: ${{ secrets.PORT }}
-          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
-          FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
-          SERVER_URL: ${{ secrets.SERVER_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<'EOF'
-            set -e
-            mkdir -p /home/ec2-user/app
-            cd /home/ec2-user/app
-
-            if [ -d ".git" ]; then
-              echo "🔄 Updating existing repository..."
-              git reset --hard
-              git pull origin main
-            else
-              echo "📦 Cloning repository..."
-              git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
-            fi
-
-            echo "🧩 Creating .env file..."
-            cat > .env <<EOL
-            MONGO_URI=$MONGO_URI
-            PORT=$PORT
-            RAPID_API_KEY=$RAPID_API_KEY
-            FRONTEND_DEV=$FRONTEND_DEV
-            SERVER_URL=$SERVER_URL
-            JWT_SECRET=$JWT_SECRET
-            EOL
-
-            echo "📦 Installing dependencies..."
-            npm ci
-
-            echo "🏗️ Building project..."
-            npm run build
-
-            echo "🚀 Restarting application with PM2..."
-            pm2 restart all || pm2 start dist/server.js --name "aiworkout-server"
-          EOF
+          echo "🚀 Restarting application with PM2..."
+          pm2 -v || npm install -g pm2
+          pm2 restart all || pm2 start index.js --name "aiworkout-server"
+        EOF
