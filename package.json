@@ -8,7 +8,8 @@
   "test:ui": "vitest --ui",
   "build": "tsc",
   "start": "node dist/server.js"
-},
+}
+,
   "keywords": [],
   "author": "",
   "license": "ISC",
