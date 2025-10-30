@@ -103,13 +103,14 @@ jobs:
 
             echo "🧩 Creating .env file..."
             cat > .env <<EOL
-            MONGO_URI=$MONGO_URI
-            PORT=$PORT
-            RAPID_API_KEY=$RAPID_API_KEY
-            FRONTEND_DEV=$FRONTEND_DEV
-            SERVER_URL=$SERVER_URL
-            JWT_SECRET=$JWT_SECRET
-            EOL
+MONGO_URI=$MONGO_URI
+PORT=$PORT
+RAPID_API_KEY=$RAPID_API_KEY
+FRONTEND_DEV=$FRONTEND_DEV
+SERVER_URL=$SERVER_URL
+JWT_SECRET=$JWT_SECRET
+EOL
+
 
             echo "📦 Installing dependencies..."
             npm ci
