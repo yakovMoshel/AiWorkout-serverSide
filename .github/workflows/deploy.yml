@@ -47,9 +47,9 @@ jobs:
         run: npm run test
 
   deploy:
-  runs-on: ubuntu-latest
-  needs: test
-  steps:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
