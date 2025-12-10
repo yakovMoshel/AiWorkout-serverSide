@@ -11,6 +11,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth';
 import setUpRoutes from './routes/setup';
 import profileRoutes from './routes/profile';
+import googleRoutes from './routes/google';
 
 import { connectToMongoDB } from './api/utils/ConnectToMongo';
 import corsOptions from './configs/corsOptions';
@@ -51,6 +52,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use('/auth', authRoutes);
 app.use('/setup', setUpRoutes);
 app.use('/profile', profileRoutes);
+app.use('/google', googleRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
