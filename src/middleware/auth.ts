@@ -23,13 +23,16 @@ export function generateToken(user: IUser) {
 
 // שליחת טוקן כ-cookie
 export function sendTokenAsCookie(res: Response, token: string) {
+  const isProd = process.env.NODE_ENV === 'production';
+
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV !== 'production' ? true : process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV !== 'production' ? 'none' : 'lax',
+    secure: isProd,         
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60,
   });
 }
+
 
 // אימות טוקן
 export function verifyToken(token: string): JwtPayload {

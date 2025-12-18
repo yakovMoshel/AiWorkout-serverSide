@@ -1,20 +1,23 @@
 import { CorsOptions } from 'cors';
 
-const aiWorkOut = process.env.NODE_ENV === 'production'
-  ? [process.env.FRONTEND_PROD]
-  : [process.env.FRONTEND_DEV];
+const allowedOrigins =
+  process.env.NODE_ENV === 'production'
+    ? [process.env.FRONTEND_PROD]
+    : [
+        process.env.FRONTEND_DEV,
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+      ];
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin || aiWorkOut.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`CORS blocked: ${origin}`));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 export default corsOptions;
