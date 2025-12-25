@@ -77,7 +77,7 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-      - name: Deploy to EC2
+           - name: Deploy to EC2
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
           PORT: ${{ secrets.PORT }}
@@ -103,19 +103,16 @@ jobs:
 
             echo "🧩 Creating .env file..."
             cat > .env <<EOL
-             MONGO_URI=${MONGO_URI}
-             PORT=${PORT}
-             RAPID_API_KEY=${RAPID_API_KEY}
-             FRONTEND_DEV=${FRONTEND_DEV}
-             SERVER_URL=${SERVER_URL}
-             JWT_SECRET=${JWT_SECRET}
-             EOL
+            MONGO_URI=${MONGO_URI}
+            PORT=${PORT}
+            RAPID_API_KEY=${RAPID_API_KEY}
+            FRONTEND_DEV=${FRONTEND_DEV}
+            SERVER_URL=${SERVER_URL}
+            JWT_SECRET=${JWT_SECRET}
+            EOL
 
-              echo "📦 Installing dependencies..."
-               npm ci
-
-            echo "🏗️ Building project..."
-            npm run build
+            echo "📦 Installing production dependencies only..."
+            npm ci --omit=dev  
 
             echo "🚀 Installing PM2 if needed..."
             command -v pm2 >/dev/null 2>&1 || npm install -g pm2
