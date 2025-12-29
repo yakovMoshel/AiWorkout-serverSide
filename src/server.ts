@@ -21,7 +21,7 @@ import cookieParser from 'cookie-parser';
 
 
 export const app = express();
-const PORT = process.env.PORT;
+  const PORT = Number(process.env.PORT) || 5000;
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
@@ -59,8 +59,10 @@ app.use(errorHandler);
 
 if (process.env.NODE_ENV !== "test") {
   connectToMongoDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
-    });
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
   });
 }
