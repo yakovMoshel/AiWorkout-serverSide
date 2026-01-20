@@ -28,7 +28,7 @@ export function sendTokenAsCookie(res: Response, token: string) {
   res.cookie('token', token, {
     httpOnly: true,
     secure: false,         
-    sameSite: 'none',
+    sameSite: 'lax',
     maxAge: 1000 * 60 * 60,
   });
 }
