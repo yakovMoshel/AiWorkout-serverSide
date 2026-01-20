@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import {  Response,  RequestHandler } from 'express';
+import { Response, RequestHandler } from 'express';
 import { IUser } from '../api/types/user';
 import { JwtPayload } from '../api/types/JwtPayload';
 
@@ -13,10 +13,10 @@ function getJwtSecret(): string {
 
 // יצירת טוקן
 export function generateToken(user: IUser) {
- 
+
   return jwt.sign(
     { id: user._id, email: user.email },
-     getJwtSecret(),
+    getJwtSecret(),
     { expiresIn: '1h' }
   );
 }
@@ -27,10 +27,11 @@ export function sendTokenAsCookie(res: Response, token: string) {
 
   res.cookie('token', token, {
     httpOnly: true,
-    secure: false,         
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     maxAge: 1000 * 60 * 60,
   });
+
 }
 
 
