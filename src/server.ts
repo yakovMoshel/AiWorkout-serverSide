@@ -25,7 +25,7 @@ export const app = express();
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
-
+app.set('trust proxy', 1);
 app.use(cors(corsOptions) as RequestHandler);
 app.use(
   helmet({
