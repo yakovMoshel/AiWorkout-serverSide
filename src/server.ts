@@ -23,7 +23,6 @@ import cookieParser from 'cookie-parser';
 export const app = express();
   const PORT = Number(process.env.PORT) || 5000;
 
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 app.set('trust proxy', 1);
 app.use(cors(corsOptions) as RequestHandler);
