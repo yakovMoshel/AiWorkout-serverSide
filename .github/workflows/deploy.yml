@@ -83,6 +83,7 @@ jobs:
           PORT: ${{ secrets.PORT }}
           RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
           FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
+          FRONTEND_PROD: ${{ secrets.FRONTEND_PROD }}
           SERVER_URL: ${{ secrets.SERVER_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -111,6 +112,7 @@ jobs:
             PORT=${PORT}
             RAPID_API_KEY=${RAPID_API_KEY}
             FRONTEND_DEV=${FRONTEND_DEV}
+            FRONTEND_PROD=${FRONTEND_PROD}
             SERVER_URL=${SERVER_URL}
             JWT_SECRET=${JWT_SECRET}
             GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
