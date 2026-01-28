@@ -20,19 +20,22 @@ router.get('/connect', (req, res) => {
 router.get('/callback', async (req, res) => {
   try {
     const code = req.query.code as string;
+    if (!code) throw new Error('No code from Google');
 
     const { tokens } = await oauthClient.getToken(code);
+    console.log('✅ TOKENS:', tokens);
 
-    console.log(tokens);
+    const frontendUrl =
+      process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_PROD
+        : process.env.FRONTEND_DEV;
 
-    // TODO: save tokens.refresh_token to DB for req.user.id
-
-    res.redirect('http://localhost:3000/settings?google=connected');
-
+    res.redirect(`${frontendUrl}/settings?google=connected`);
   } catch (err) {
-    console.error(err);
+    console.error('❌ OAUTH ERROR', err);
     res.status(500).send('OAuth failed');
   }
 });
+
 
 export default router;
