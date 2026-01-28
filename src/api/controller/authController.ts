@@ -13,8 +13,8 @@ export const register: RequestHandler = async (req, res, next) => {
   try {
     const { email, password, name } = req.body;
     const { user, token } = await registerUser(email, password, name);
-    sendTokenAsCookie(res, token);
     console.log(req.body)
+    sendTokenAsCookie(res, token);
     res.status(201).json({
       message: 'User registered successfully',
       user: { email: user.email, name: user.name },
