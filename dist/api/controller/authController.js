@@ -13,11 +13,13 @@ const register = async (req, res, next) => {
     try {
         const { email, password, name } = req.body;
         const { user, token } = await (0, authService_1.registerUser)(email, password, name);
+        console.log(req.body);
         (0, auth_1.sendTokenAsCookie)(res, token);
         res.status(201).json({
             message: 'User registered successfully',
             user: { email: user.email, name: user.name },
         });
+        console.log(user);
     }
     catch (err) {
         const status = err.status || 500;

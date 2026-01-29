@@ -22,8 +22,8 @@ const errorHandler_1 = require("./middleware/errorHandler");
 const notFound_1 = require("./middleware/notFound");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 exports.app = (0, express_1.default)();
-const PORT = process.env.PORT;
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
+const PORT = Number(process.env.PORT) || 5000;
+exports.app.set('trust proxy', 1);
 exports.app.use((0, cors_1.default)(corsOptions_1.default));
 exports.app.use((0, helmet_1.default)({
     contentSecurityPolicy: false,
@@ -46,8 +46,8 @@ exports.app.use(notFound_1.notFound);
 exports.app.use(errorHandler_1.errorHandler);
 if (process.env.NODE_ENV !== "test") {
     (0, ConnectToMongo_1.connectToMongoDB)().then(() => {
-        exports.app.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
+        exports.app.listen(PORT, '0.0.0.0', () => {
+            console.log(`🚀 Server running on port ${PORT}`);
         });
     });
 }

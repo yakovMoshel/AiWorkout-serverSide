@@ -21,11 +21,11 @@ function generateToken(user) {
 }
 // שליחת טוקן כ-cookie
 function sendTokenAsCookie(res, token) {
-    const isProd = process.env.NODE_ENV === 'production';
+    // const isProd = process.env.NODE_ENV === 'production';
     res.cookie('token', token, {
         httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 1000 * 60 * 60,
     });
 }
