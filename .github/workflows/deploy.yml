@@ -124,19 +124,19 @@ jobs:
 
             echo "🧩 Creating .env file..."
             cat > .env <<EOL
-          MONGO_URI=${MONGO_URI}
-          PORT=${PORT}
-          RAPID_API_KEY=${RAPID_API_KEY}
-          FRONTEND_DEV=${FRONTEND_DEV}
-          FRONTEND_PROD=${FRONTEND_PROD}
-          SERVER_URL=${SERVER_URL}
-          JWT_SECRET=${JWT_SECRET}
-          GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-          GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-          GOOGLE_REDIRECT_URI_DEV=${GOOGLE_REDIRECT_URI_DEV}
-          GOOGLE_REDIRECT_URI_PROD=${GOOGLE_REDIRECT_URI_PROD}
-          NODE_ENV=production
-          EOL
+            MONGO_URI=${MONGO_URI}
+            PORT=${PORT}
+            RAPID_API_KEY=${RAPID_API_KEY}
+            FRONTEND_DEV=${FRONTEND_DEV}
+            FRONTEND_PROD=${FRONTEND_PROD}
+            SERVER_URL=${SERVER_URL}
+            JWT_SECRET=${JWT_SECRET}
+            GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+            GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+            GOOGLE_REDIRECT_URI_DEV=${GOOGLE_REDIRECT_URI_DEV}
+            GOOGLE_REDIRECT_URI_PROD=${GOOGLE_REDIRECT_URI_PROD}
+            NODE_ENV=production
+            EOL
 
             echo "📦 Installing production dependencies only..."
             npm ci --omit=dev  
