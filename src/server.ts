@@ -46,7 +46,11 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 
 // Import routes
-
+// ⬇️ הוסף את זה
+console.log("🔍 ENV CHECK:");
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+console.log("GOOGLE_REDIRECT_URI_PROD:", process.env.GOOGLE_REDIRECT_URI_PROD);
 
 app.use('/auth', authRoutes);
 app.use('/setup', setUpRoutes);

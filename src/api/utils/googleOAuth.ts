@@ -6,12 +6,17 @@ export function getOAuthClient() {
       ? process.env.GOOGLE_REDIRECT_URI_PROD
       : process.env.GOOGLE_REDIRECT_URI_DEV;
 
+  console.log("Using redirect URI:", redirectUri);
+  console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+  console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
 
-      console.log("Using redirect URI🖖:", redirectUri);
-
-  return new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID!,
-    process.env.GOOGLE_CLIENT_SECRET!,
+  const client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
     redirectUri
   );
+
+  console.log("OAuth2Client created:", client._clientId); // ⬅️ בדיקה
+
+  return client;
 }
