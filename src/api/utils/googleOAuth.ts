@@ -6,7 +6,6 @@ export function getOAuthClient() {
       ? process.env.GOOGLE_REDIRECT_URI_PROD
       : process.env.GOOGLE_REDIRECT_URI_DEV;
 
-  console.log("Using redirect URI:", redirectUri);
   console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
   console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
 
