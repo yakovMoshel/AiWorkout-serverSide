@@ -21,6 +21,7 @@ router.get('/callback', async (req, res) => {
   try {
     const oauthClient = getOAuthClient();
     const code = req.query.code as string;
+    console.log('Callback query:', req.query);
 
     if (!code) {
       console.error('No code received in callback');
