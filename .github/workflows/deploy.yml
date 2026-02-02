@@ -71,86 +71,65 @@ jobs:
           name: dist
           path: dist/
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  - name: Deploy to EC2
+  env:
+    MONGO_URI: ${{ secrets.MONGO_URI }}
+    PORT: ${{ secrets.PORT }}
+    RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+    FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
+    FRONTEND_PROD: ${{ secrets.FRONTEND_PROD }}
+    SERVER_URL: ${{ secrets.SERVER_URL }}
+    JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+    GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+    GOOGLE_REDIRECT_URI_DEV: ${{ secrets.GOOGLE_REDIRECT_URI_DEV }}
+    GOOGLE_REDIRECT_URI_PROD: ${{ secrets.GOOGLE_REDIRECT_URI_PROD }}
+  run: |
+    # Copy dist folder to EC2
+    scp -o StrictHostKeyChecking=no -i private_key.pem -r dist ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/aiworkout-server/
 
-      - name: Download dist artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
+    # Deploy on EC2
+    ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} "MONGO_URI='$MONGO_URI' PORT='$PORT' RAPID_API_KEY='$RAPID_API_KEY' FRONTEND_DEV='$FRONTEND_DEV' FRONTEND_PROD='$FRONTEND_PROD' SERVER_URL='$SERVER_URL' JWT_SECRET='$JWT_SECRET' GOOGLE_CLIENT_ID='$GOOGLE_CLIENT_ID' GOOGLE_CLIENT_SECRET='$GOOGLE_CLIENT_SECRET' GOOGLE_REDIRECT_URI_DEV='$GOOGLE_REDIRECT_URI_DEV' GOOGLE_REDIRECT_URI_PROD='$GOOGLE_REDIRECT_URI_PROD' bash -s" <<'ENDSSH'
+      set -ex
 
-      - name: Set up SSH key
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
+      mkdir -p /home/ec2-user/aiworkout-server
+      cd /home/ec2-user/aiworkout-server
 
-      - name: Deploy to EC2
-        env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          PORT: ${{ secrets.PORT }}
-          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
-          FRONTEND_DEV: ${{ secrets.FRONTEND_DEV }}
-          FRONTEND_PROD: ${{ secrets.FRONTEND_PROD }}
-          SERVER_URL: ${{ secrets.SERVER_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_REDIRECT_URI_DEV: ${{ secrets.GOOGLE_REDIRECT_URI_DEV }}
-          GOOGLE_REDIRECT_URI_PROD: ${{ secrets.GOOGLE_REDIRECT_URI_PROD }}
-        run: |
-          # Copy dist folder to EC2
-          scp -o StrictHostKeyChecking=no -i private_key.pem -r dist ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/aiworkout-server/
+      if [ -d ".git" ]; then
+        echo "🔄 Updating existing repository..."
+        git reset --hard
+        git pull origin main
+      else
+        echo "📦 Cloning repository..."
+        git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
+      fi
 
-          # Deploy on EC2
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<'EOF'
-            set -ex
+      echo "🧩 Creating .env file..."
+      cat > .env <<EOL
+       MONGO_URI=${MONGO_URI}
+       PORT=${PORT}
+       RAPID_API_KEY=${RAPID_API_KEY}
+       FRONTEND_DEV=${FRONTEND_DEV}
+       FRONTEND_PROD=${FRONTEND_PROD}
+       SERVER_URL=${SERVER_URL}
+       JWT_SECRET=${JWT_SECRET}
+       GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+       GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+       GOOGLE_REDIRECT_URI_DEV=${GOOGLE_REDIRECT_URI_DEV}
+       GOOGLE_REDIRECT_URI_PROD=${GOOGLE_REDIRECT_URI_PROD}
+      echo "📦 Installing production dependencies only..."
+      npm ci --omit=dev  
 
-            mkdir -p /home/ec2-user/aiworkout-server
-            cd /home/ec2-user/aiworkout-server
+      echo "🚀 Installing PM2 if needed..."
+      command -v pm2 >/dev/null 2>&1 || npm install -g pm2
 
-            if [ -d ".git" ]; then
-              echo "🔄 Updating existing repository..."
-              git reset --hard
-              git pull origin main
-            else
-              echo "📦 Cloning repository..."
-              git clone https://github.com/yakovMoshel/AiWorkout-serverSide.git .
-            fi
+      echo "🔄 Starting or restarting server with PM2..."
+      if pm2 list | grep -q aiworkout-server; then
+        pm2 restart aiworkout-server --update-env
+      else
+        pm2 start dist/server.js --name "aiworkout-server" --update-env
+      fi
 
-            echo "🧩 Creating .env file..."
-            cat > .env <<EOL
-            MONGO_URI=${MONGO_URI}
-            PORT=${PORT}
-            RAPID_API_KEY=${RAPID_API_KEY}
-            FRONTEND_DEV=${FRONTEND_DEV}
-            FRONTEND_PROD=${FRONTEND_PROD}
-            SERVER_URL=${SERVER_URL}
-            JWT_SECRET=${JWT_SECRET}
-            GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-            GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-            GOOGLE_REDIRECT_URI_DEV=${GOOGLE_REDIRECT_URI_DEV}
-            GOOGLE_REDIRECT_URI_PROD=${GOOGLE_REDIRECT_URI_PROD}
-            NODE_ENV=production
-            EOL
-
-            echo "📦 Installing production dependencies only..."
-            npm ci --omit=dev  
-
-            echo "🚀 Installing PM2 if needed..."
-            command -v pm2 >/dev/null 2>&1 || npm install -g pm2
-
-            echo "🔄 Starting or restarting server with PM2..."
-            if pm2 list | grep -q aiworkout-server; then
-              pm2 restart aiworkout-server --update-env
-            else
-              pm2 start dist/server.js --name "aiworkout-server" --update-env
-            fi
-
-            echo "✅ Deployment complete!"
-            pm2 logs aiworkout-server --lines 20
-          EOF
+      echo "✅ Deployment complete!"
+      pm2 logs aiworkout-server --lines 20
+    ENDSSH
