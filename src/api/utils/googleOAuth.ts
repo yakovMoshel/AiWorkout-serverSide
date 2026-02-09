@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import User from '../models/User';
 
 export function getOAuthClient() {
   const redirectUri =
@@ -18,4 +19,19 @@ export function getOAuthClient() {
   console.log("OAuth2Client created:", client._clientId); // ⬅️ בדיקה
 
   return client;
+}
+
+
+export async function getOAuthClientForUser(userId: string) {
+  const user = await User.findById(userId);
+
+  if (!user || !user.googleTokens) {
+    throw new Error('User has no Google tokens');
+  }
+
+  const oauthClient = getOAuthClient();
+
+  oauthClient.setCredentials(user.googleTokens);
+
+  return oauthClient;
 }

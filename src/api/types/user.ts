@@ -18,4 +18,11 @@ export interface IUser extends Document {
   sessionDuration?: number;
   planDurationWeeks?: number;
   image?: string;
+  googleTokens?: {
+    access_token: string;
+    refresh_token: string;
+    scope: string;
+    token_type: string;
+    expiry_date: number;
+  };
 }

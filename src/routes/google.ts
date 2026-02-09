@@ -1,45 +1,53 @@
 import { Router } from 'express';
-import { getOAuthClient } from '../api/utils/googleOAuth';
+import { authenticate } from '../middleware/auth';
+import { connectGoogle, googleCallback } from '../api/controller/googleController';
+import { getOAuthClientForUser } from '../api/utils/googleOAuth';
+import { google } from 'googleapis';
 
 const router = Router();
 
 // התחברות ל־Google
-router.get('/connect', (req, res) => {
-  const oauthClient = getOAuthClient();
-
-  const url = oauthClient.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
-    scope: ['https://www.googleapis.com/auth/calendar'],
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI_PROD, // חשוב: מפורש
-  });
-
-  console.log('Redirecting user to Google OAuth URL:', url);
-  res.redirect(url);
-});
+router.get('/connect', connectGoogle);
 
 // callback מ־Google
-router.get('/callback', async (req, res, next): Promise<void> => {
-  console.log('Callback query:', req.query);
-  const code = req.query.code as string;
+router.get('/callback', authenticate, googleCallback);
 
-  if (!code) {
-    console.error('No code received in callback');
-    res.status(400).send('Missing code from Google OAuth');
-    return;
-  }
-
+router.post('/create-workout-event', authenticate, async (req, res) => {
   try {
-    const oauthClient = getOAuthClient();
+    const user = (req as any).user;
+    const oauthClient = await getOAuthClientForUser(user.id);
 
-    // אין צורך לשנות redirectUri, נעבור דרך הפרמטר בעת יצירת הלקוח
-    const { tokens } = await oauthClient.getToken(code);
+    const calendar = google.calendar({
+      version: 'v3',
+      auth: oauthClient,
+    });
 
-    console.log('Received tokens from Google:', tokens);
-    res.redirect('/settings?google=connected');
+    const event = {
+      summary: '💪 Workout Session',
+      description: 'AI Workout training session',
+      start: {
+        dateTime: new Date().toISOString(),
+        timeZone: 'Asia/Jerusalem',
+      },
+      end: {
+        dateTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        timeZone: 'Asia/Jerusalem',
+      },
+    };
+
+    const response = await calendar.events.insert({
+      calendarId: 'primary',
+      requestBody: event,
+    });
+
+    res.json({
+      message: 'Workout event created',
+      link: response.data.htmlLink,
+    });
+
   } catch (err) {
-    console.error('OAuth callback error:', err);
-    res.status(500).send('OAuth failed');
+    console.error('Create event error:', err);
+    res.status(500).json({ message: 'Failed to create event' });
   }
 });
 
