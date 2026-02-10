@@ -1,5 +1,4 @@
-import { getOAuthClient, getOAuthClientForUser } from '../utils/googleOAuth';
-import User from '../models/User';
+import User from '../../models/User';
 import {
     calculateTotalDuration,
     dayMapping,
@@ -8,47 +7,15 @@ import {
     formatWorkoutDescription,
     getFocusArea,
     getNextDayOfWeek
-} from '../utils/workoutHelpers';
+} from '../../utils/workoutHelpers';
 import { google } from 'googleapis';
-
-export const generateGoogleAuthUrl = (): string => {
-    const oauthClient = getOAuthClient();
-
-    const url = oauthClient.generateAuthUrl({
-        access_type: 'offline',
-        prompt: 'consent',
-        scope: ['https://www.googleapis.com/auth/calendar'],
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI_PROD,
-    });
-
-    return url;
-};
-
-export const handleGoogleCallback = async (
-    code: string,
-    userId: string
-): Promise<void> => {
-    if (!code) {
-        throw new Error('No code received in callback');
-    }
-
-    const oauthClient = getOAuthClient();
-    const { tokens } = await oauthClient.getToken(code);
-
-    if (!tokens) {
-        throw new Error('No tokens returned from Google');
-    }
-
-    await User.findByIdAndUpdate(userId, {
-        googleTokens: tokens,
-    });
-
-    console.log('Tokens saved for user:', userId);
-};
+import { Request } from 'express';
+import { getOAuthClientForUser } from '../../utils/googleOAuth';
 
 
 export const createWorkoutEventsService = async (req: Request) => {
     const user = (req as any).user;
+    const { trainingTimes } = req.body;
     const userData = await User.findById(user.id);
 
     if (!userData) {
@@ -57,6 +24,11 @@ export const createWorkoutEventsService = async (req: Request) => {
 
     if (!userData.workoutPlan || !userData.trainingDays) {
         throw new Error('No workout plan found. Please complete your profile first.');
+    }
+
+    if (trainingTimes) {
+        userData.trainingTimes = new Map(Object.entries(trainingTimes));
+        await userData.save();
     }
 
     const oauthClient = await getOAuthClientForUser(user.id);
@@ -77,6 +49,12 @@ export const createWorkoutEventsService = async (req: Request) => {
             console.log(`No workout found for ${fullDay}`);
             continue;
         }
+
+        const selectedTime = trainingTimes?.[shortDay] ||
+            userData.trainingTimes?.get(shortDay) ||
+            '20:00';
+
+        const [hours, minutes] = selectedTime.split(':').map(Number);
 
         const targetDayNumber = dayToNumber[fullDay];
         const nextDate = getNextDayOfWeek(new Date(), targetDayNumber);
@@ -117,6 +95,7 @@ export const createWorkoutEventsService = async (req: Request) => {
 
         createdEvents.push({
             day: fullDay,
+            time: selectedTime,
             link: response.data.htmlLink,
             startDate: nextDate.toISOString(),
             endDate: endDate.toISOString(),

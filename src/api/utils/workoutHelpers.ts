@@ -7,8 +7,14 @@
  * @param baseDate - Start date
  * @param targetDay - Target day (0-6, where 0 = Sunday)
  * @param hour - Workout time (default: 9:00)
+ * @param minute - Workout time (default: 0 minutes)
  */
-export function getNextDayOfWeek(baseDate: Date, targetDay: number, hour: number = 9): Date {
+export function getNextDayOfWeek(
+  baseDate: Date, 
+  targetDay: number, 
+  hour: number = 9, 
+  minute: number = 0
+): Date {
   const result = new Date(baseDate);
   const currentDay = result.getDay();
   
@@ -18,10 +24,11 @@ export function getNextDayOfWeek(baseDate: Date, targetDay: number, hour: number
   }
   
   result.setDate(result.getDate() + daysToAdd);
-  result.setHours(hour, 0, 0, 0);
+  result.setHours(hour, minute, 0, 0); 
   
   return result;
 }
+
 
 /**
  * Creates a detailed workout description for a calendar event

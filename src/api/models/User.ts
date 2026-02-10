@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema<IUser>({
   image: { type: String },
   experience: { type: String },
   trainingDays: [{ type: String }],
+  trainingTimes: {
+    type: Map,
+    of: String,
+    default: () => new Map()
+  },
   healthNotes: { type: String },
   preferences: [{ type: String }],
   sessionDuration: { type: Number },

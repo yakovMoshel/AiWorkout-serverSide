@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { createWorkoutEventsService, generateGoogleAuthUrl, handleGoogleCallback } from '../services/googleService';
+import { generateGoogleAuthUrl, handleGoogleCallback } from '../services/google/googleAuthService';
+import { createWorkoutEventsService } from '../services/google/googleCalendarService';
 
 export const connectGoogle = (req: Request, res: Response): void => {
     try {
