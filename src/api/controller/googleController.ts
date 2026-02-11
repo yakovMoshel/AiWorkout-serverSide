@@ -38,7 +38,7 @@ export const googleCallback = async (req: Request, res: Response): Promise<void>
 
 export const createWorkoutEvents = async (req: Request, res: Response) => {
     try {
-        const result = await createWorkoutEventsService(req.body);
+        const result = await createWorkoutEventsService(req);
         res.json(result);
     } catch (err) {
         console.error('Create recurring events error:', err);
