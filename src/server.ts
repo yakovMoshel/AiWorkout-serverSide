@@ -12,6 +12,7 @@ import authRoutes from './routes/auth';
 import setUpRoutes from './routes/setup';
 import profileRoutes from './routes/profile';
 import googleRoutes from './routes/google';
+import aiRoutes from './routes/chatAi';
 
 import { connectToMongoDB } from './api/utils/ConnectToMongo';
 import corsOptions from './configs/corsOptions';
@@ -50,6 +51,7 @@ app.use('/auth', authRoutes);
 app.use('/setup', setUpRoutes);
 app.use('/profile', profileRoutes);
 app.use('/google', googleRoutes);
+app.use('/ai', aiRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

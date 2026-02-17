@@ -75,6 +75,7 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI_DEV: ${{ secrets.GOOGLE_REDIRECT_URI_DEV }}
           GOOGLE_REDIRECT_URI_PROD: ${{ secrets.GOOGLE_REDIRECT_URI_PROD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           cat > .env <<EOF
           MONGO_URI=$MONGO_URI
@@ -89,6 +90,7 @@ jobs:
           GOOGLE_REDIRECT_URI_DEV=$GOOGLE_REDIRECT_URI_DEV
           GOOGLE_REDIRECT_URI_PROD=$GOOGLE_REDIRECT_URI_PROD
           NODE_ENV=production
+          OPENAI_API_KEY=$OPENAI_API_KEY
           EOF
 
       - name: Set up SSH key
