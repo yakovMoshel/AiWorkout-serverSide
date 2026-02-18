@@ -10,7 +10,9 @@ export async function handleAiChat(req: Request, res: Response) {
     }
 
     const reply = await createAiChatReply(message.trim());
-    console.log(req.body);
+    console.log("HEADERS:", req.headers);
+console.log("BODY:", req.body);
+
     return res.status(200).json({ reply });
   } catch (err) {
     console.error('AI error:', err);
