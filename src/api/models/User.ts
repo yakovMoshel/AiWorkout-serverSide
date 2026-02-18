@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema<IUser>({
     of: String,
     default: () => new Map()
   },
+  aiUsage: {
+  type: Number,
+  default: 0
+},
   healthNotes: { type: String },
   preferences: [{ type: String }],
   sessionDuration: { type: Number },

@@ -13,6 +13,7 @@ export interface IUser extends Document {
   experience?: string;
   trainingDays?: string[];
   trainingTimes?: Map<string, string>;
+  aiUsage?: number;
   healthNotes?: string;
   workoutPlan?: any;
   preferences?: string[];

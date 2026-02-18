@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import { createAiChatReply } from '../services/aiService';
+import User from '../models/User'; // ה-model שלך
+
+const AI_LIMIT = 10;
 
 export async function handleAiChat(req: Request, res: Response) {
   try {
@@ -9,9 +12,22 @@ export async function handleAiChat(req: Request, res: Response) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
+    const userId = (req as any).user?.id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    const aiUsage = user.aiUsage ?? 0;
+    if (aiUsage >= AI_LIMIT) {
+      return res.status(403).json({ error: 'Free AI messages finished. Upgrade soon 😉' });
+    }
+
     const reply = await createAiChatReply(message.trim());
-    console.log("HEADERS:", req.headers);
-console.log("BODY:", req.body);
+
+    user.aiUsage = aiUsage + 1;
+    await user.save();
 
     return res.status(200).json({ reply });
   } catch (err) {
