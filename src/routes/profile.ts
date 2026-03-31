@@ -7,7 +7,11 @@ import { fileFilter, storage } from '../api/utils/fileFilter';
 const router = express.Router();
 
 
-const upload = multer({ storage : storage, fileFilter : fileFilter });
+const upload = multer({ 
+  storage: storage, 
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } 
+});
 
 router.put('/edit', authenticate, upload.single('image'), async (req, res, next) => {
   try {
