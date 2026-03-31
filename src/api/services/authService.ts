@@ -53,7 +53,7 @@ export async function getUserFromToken(token: string) {
   if (!user) return null;
 
  if (user.image) {
-  user.image = `https://${process.env.SERVER_URL}${user.image}`;
+  user.image = `${process.env.SERVER_URL}${user.image}`;
 }
   return {
     name: user.name,
