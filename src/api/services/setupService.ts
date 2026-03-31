@@ -81,32 +81,5 @@ export async function generateWorkoutPlan(
   await user.save();
 
   return user;
-}
+}   
 
-// export async function getWorkoutPlanStatus(userId: string) {
-//   const user = await User.findById(userId);
-//   if (!user || !user.workoutPlan?.queueId) {
-//     throw new Error('No workout plan in progress');
-//   }
-
-//   const queueId = user.workoutPlan.queueId;
-
-//   const response = await axios.get(
-//     `https://ai-workout-planner-exercise-fitness-nutrition-guide.p.rapidapi.com/checkWorkoutStatus?queueId=${queueId}`,
-//     {
-//       headers: {
-//         'X-RapidAPI-Key': process.env.RAPID_API_KEY || '',
-//         'X-RapidAPI-Host': 'ai-workout-planner-exercise-fitness-nutrition-guide.p.rapidapi.com',
-//       },
-//     }
-//   );
-
-//   const planData = response.data;
-
-//   if (planData.status === 'completed') {
-//     user.workoutPlan = planData; // שמירה של התוכנית המלאה
-//     await user.save();
-//   }
-
-//   return planData;
-// }
