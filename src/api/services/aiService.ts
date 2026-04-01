@@ -9,7 +9,7 @@ export async function createAiChatReply(message: string): Promise<string> {
       { role: 'system', content: systemPrompt },
       { role: 'user', content: message },
     ],
-    max_tokens:150
+    max_tokens:500
   });
 
   return response.choices[0]?.message?.content ?? '';
