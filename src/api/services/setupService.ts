@@ -1,6 +1,7 @@
 import axios from 'axios';
 import User from '../models/User';
 import { IUser } from '../types/user';
+import Exercise from '../models/Exercise';
 
 interface SetupFormInput {
   gender: string;
@@ -41,7 +42,6 @@ export async function generateWorkoutPlan(
   // Call external API first
   const options = {
     method: 'POST',
-    url: 'https://ai-workout-planner-exercise-fitness-nutrition-guide.p.rapidapi.com/generateWorkoutPlan',
     params: { noqueue: '1' },
     headers: {
       'x-rapidapi-key': process.env.RAPID_API_KEY || '',
@@ -64,7 +64,18 @@ export async function generateWorkoutPlan(
 
   const response = await axios.request(options);
   const workoutPlan = response.data;
-
+if (workoutPlan?.exercises) {
+  for (const day of workoutPlan.exercises) {
+    for (const exercise of day.exercises) {
+      const found = await Exercise.findOne({ 
+        name: { $regex: new RegExp(`^${exercise.name}$`, 'i') } 
+      });
+      if (found) {
+        exercise.image = `${process.env.SERVER_URL}${found.image}`;
+      }
+    }
+  }
+}
   // Only if API succeeded, update profile and plan together
   user.gender = gender;
   user.age = age;
