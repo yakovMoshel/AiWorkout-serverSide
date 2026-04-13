@@ -35,13 +35,12 @@ export async function generateWorkoutPlan(
     planDurationWeeks = 8,
   } = formData;
 
-  // Get user first
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
-  // Call external API first
   const options = {
     method: 'POST',
+    url: 'https://ai-workout-planner-exercise-fitness-nutrition-guide.p.rapidapi.com/generateWorkoutPlan', // ← חזר
     params: { noqueue: '1' },
     headers: {
       'x-rapidapi-key': process.env.RAPID_API_KEY || '',
@@ -64,19 +63,20 @@ export async function generateWorkoutPlan(
 
   const response = await axios.request(options);
   const workoutPlan = response.data;
-if (workoutPlan?.exercises) {
-  for (const day of workoutPlan.exercises) {
-    for (const exercise of day.exercises) {
-      const found = await Exercise.findOne({ 
-        name: { $regex: new RegExp(`^${exercise.name}$`, 'i') } 
-      });
-      if (found) {
-        exercise.image = `${process.env.SERVER_URL}${found.image}`;
+
+  if (workoutPlan?.exercises) {
+    for (const day of workoutPlan.exercises) {
+      for (const exercise of day.exercises) {
+        const found = await Exercise.findOne({
+          name: { $regex: new RegExp(`^${exercise.name}$`, 'i') }
+        });
+        if (found) {
+          exercise.image = `${process.env.SERVER_URL}${found.image}`;
+        }
       }
     }
   }
-}
-  // Only if API succeeded, update profile and plan together
+
   user.gender = gender;
   user.age = age;
   user.height = height;
@@ -92,5 +92,4 @@ if (workoutPlan?.exercises) {
   await user.save();
 
   return user;
-}   
-
+}
