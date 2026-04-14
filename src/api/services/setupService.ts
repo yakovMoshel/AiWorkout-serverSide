@@ -64,14 +64,16 @@ export async function generateWorkoutPlan(
   const response = await axios.request(options);
   const workoutPlan = response.data;
 
-  if (workoutPlan?.exercises) {
-    for (const day of workoutPlan.exercises) {
+  const days = workoutPlan?.result?.exercises ?? workoutPlan?.exercises;
+  if (days) {
+    for (const day of days) {
       for (const exercise of day.exercises) {
         const found = await Exercise.findOne({
           name: { $regex: new RegExp(`^${exercise.name}$`, 'i') }
         });
         if (found) {
           exercise.image = `${process.env.SERVER_URL}${found.image}`;
+          console.log(exercise.image);
         }
       }
     }
