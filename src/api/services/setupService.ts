@@ -65,15 +65,24 @@ export async function generateWorkoutPlan(
   const workoutPlan = response.data;
 
   const days = workoutPlan?.result?.exercises ?? workoutPlan?.exercises;
+  console.log('[setup] workoutPlan top-level keys:', Object.keys(workoutPlan ?? {}));
+  console.log('[setup] days:', days ? `${days.length} days found` : 'UNDEFINED - wrong path');
+  if (days?.[0]) {
+    console.log('[setup] sample exercise:', JSON.stringify(days[0].exercises?.[0]));
+  }
+
+  const exerciseCount = await Exercise.countDocuments();
+  console.log('[setup] Exercise collection count:', exerciseCount);
+
   if (days) {
     for (const day of days) {
       for (const exercise of day.exercises) {
         const found = await Exercise.findOne({
           name: { $regex: new RegExp(`^${exercise.name}$`, 'i') }
         });
+        console.log(`[setup] "${exercise.name}" → ${found ? `MATCHED: ${found.image}` : 'NO MATCH'}`);
         if (found) {
           exercise.image = `${process.env.SERVER_URL}${found.image}`;
-          console.log(exercise.image);
         }
       }
     }
