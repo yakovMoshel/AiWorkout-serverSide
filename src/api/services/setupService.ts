@@ -82,7 +82,9 @@ export async function generateWorkoutPlan(
         });
         console.log(`[setup] "${exercise.name}" → ${found ? `MATCHED: ${found.image}` : 'NO MATCH'}`);
         if (found) {
-          exercise.image = `${process.env.SERVER_URL}${found.image}`;
+          const base = (process.env.SERVER_URL ?? '').replace(/\/$/, '');
+          const baseWithProtocol = base.startsWith('http') ? base : `https://${base}`;
+          exercise.image = `${baseWithProtocol}${found.image}`;
         }
       }
     }
