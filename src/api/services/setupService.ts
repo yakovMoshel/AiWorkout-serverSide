@@ -1,4 +1,6 @@
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 import User from '../models/User';
 import { IUser } from '../types/user';
 import Exercise from '../models/Exercise';
@@ -65,14 +67,6 @@ export async function generateWorkoutPlan(
   const workoutPlan = response.data;
 
   const days = workoutPlan?.result?.exercises ?? workoutPlan?.exercises;
-  console.log('[setup] workoutPlan top-level keys:', Object.keys(workoutPlan ?? {}));
-  console.log('[setup] days:', days ? `${days.length} days found` : 'UNDEFINED - wrong path');
-  if (days?.[0]) {
-    console.log('[setup] sample exercise:', JSON.stringify(days[0].exercises?.[0]));
-  }
-
-  const exerciseCount = await Exercise.countDocuments();
-  console.log('[setup] Exercise collection count:', exerciseCount);
 
   if (days) {
     for (const day of days) {
@@ -80,11 +74,14 @@ export async function generateWorkoutPlan(
         const found = await Exercise.findOne({
           name: { $regex: new RegExp(`^${exercise.name}$`, 'i') }
         });
-        console.log(`[setup] "${exercise.name}" → ${found ? `MATCHED: ${found.image}` : 'NO MATCH'}`);
         if (found) {
-          const base = (process.env.SERVER_URL ?? '').replace(/\/$/, '');
-          const baseWithProtocol = base.startsWith('http') ? base : `https://${base}`;
-          exercise.image = `${baseWithProtocol}${found.image}`;
+          const imagePath = path.join(process.cwd(), found.image);
+          if (fs.existsSync(imagePath)) {
+            const ext = path.extname(found.image).replace('.', '');
+            const mimeType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : `image/${ext}`;
+            const base64 = fs.readFileSync(imagePath).toString('base64');
+            exercise.image = `data:${mimeType};base64,${base64}`;
+          }
         }
       }
     }
