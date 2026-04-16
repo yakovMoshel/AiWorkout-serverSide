@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema<IUser>({
   sessionDuration: { type: Number },
   planDurationWeeks: { type: Number },
   workoutPlan: { type: mongoose.Schema.Types.Mixed },
+  nutritionPlan: { type: mongoose.Schema.Types.Mixed },
   googleTokens: {
     access_token: String,
     refresh_token: String,

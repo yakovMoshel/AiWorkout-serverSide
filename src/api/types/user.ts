@@ -16,6 +16,7 @@ export interface IUser extends Document {
   aiUsage?: number;
   healthNotes?: string;
   workoutPlan?: any;
+  nutritionPlan?: any;
   preferences?: string[];
   sessionDuration?: number;
   planDurationWeeks?: number;
