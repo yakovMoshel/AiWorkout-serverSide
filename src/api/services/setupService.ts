@@ -1,6 +1,7 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 import User from '../models/User';
 import { IUser } from '../types/user';
 import Exercise from '../models/Exercise';
@@ -74,14 +75,22 @@ export async function generateWorkoutPlan(
         const found = await Exercise.findOne({
           name: { $regex: new RegExp(`^${exercise.name}$`, 'i') }
         });
-        if (found) {
+        if (!found) continue;
+
+        if (!found.imageBase64) {
           const imagePath = path.join(process.cwd(), found.image);
           if (fs.existsSync(imagePath)) {
-            const ext = path.extname(found.image).replace('.', '');
-            const mimeType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : `image/${ext}`;
-            const base64 = fs.readFileSync(imagePath).toString('base64');
-            exercise.image = `data:${mimeType};base64,${base64}`;
+            const buffer = await sharp(imagePath)
+              .resize(400, 400, { fit: 'cover' })
+              .jpeg({ quality: 75 })
+              .toBuffer();
+            found.imageBase64 = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+            await found.save();
           }
+        }
+
+        if (found.imageBase64) {
+          exercise.image = found.imageBase64;
         }
       }
     }
