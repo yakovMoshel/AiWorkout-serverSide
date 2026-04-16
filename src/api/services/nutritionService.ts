@@ -36,7 +36,7 @@ export async function generateNutritionPlan(
   const restrictions = dietaryRestrictions.filter((r) => r !== 'None');
   const restrictionsText = restrictions.length > 0 ? restrictions.join(', ') : 'None';
 
-  const userPrompt = `Create a 7-day nutrition plan for someone with these details:
+  const userPrompt = `Create a nutrition plan for someone with these details:
 - Goal: ${goalMap[goal] || goal}
 - Current weight: ${weight}kg
 - Target weight: ${targetWeight ?? weight}kg
@@ -53,7 +53,7 @@ Return ONLY this JSON structure, nothing else:
   },
   "meal_suggestions": [
     {
-      "meal": "string (e.g. Breakfast)",
+      "meal": "string",
       "suggestions": [
         {
           "name": "string",
@@ -71,7 +71,7 @@ Return ONLY this JSON structure, nothing else:
 }
 
 Include exactly 6 meals: Breakfast, Mid-Morning Snack, Lunch, Afternoon Snack, Dinner, Evening Snack.
-Include exactly 7 suggestions per meal (one per day of the week).`;
+Include exactly 3 suggestions per meal.`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
@@ -85,11 +85,19 @@ Include exactly 7 suggestions per meal (one per day of the week).`;
         content: userPrompt,
       },
     ],
-    max_tokens: 4000,
+    max_tokens: 8000,
   });
 
   const raw = response.choices[0]?.message?.content ?? '{}';
-  const nutritionPlan = JSON.parse(raw);
+
+  let nutritionPlan;
+  try {
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    nutritionPlan = JSON.parse(cleaned);
+  } catch (err) {
+    console.error('JSON parse error:', raw.slice(0, 500));
+    throw new Error('Failed to parse nutrition plan from GPT');
+  }
 
   await User.findByIdAndUpdate(userId, { $set: { nutritionPlan } });
 
