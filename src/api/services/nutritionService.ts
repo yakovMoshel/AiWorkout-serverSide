@@ -46,6 +46,8 @@ export async function generateNutritionPlan(
       current_weight: weight,
       target_weight: targetWeight ?? weight,
       daily_activity_level: activityLevel,
+      meal_variety: 7,        // ← הוסף
+      meals_per_day: 6,
       lang: 'en',
     },
   };
