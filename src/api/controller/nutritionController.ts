@@ -56,7 +56,11 @@ export async function getNutritionPlan(req: Request, res: Response) {
     }
 
     const nutritionPlan = user.nutritionPlan;
-    const mealSuggestions = nutritionPlan?.result?.meal_suggestions ?? [];
+    // GPT returns flat structure; RapidAPI (legacy) wrapped in .result
+    const mealSuggestions =
+      nutritionPlan?.meal_suggestions ??
+      nutritionPlan?.result?.meal_suggestions ??
+      [];
     const weeklyMealPlan = mealSuggestions.length > 0
       ? buildWeeklyMealPlan(mealSuggestions)
       : null;
