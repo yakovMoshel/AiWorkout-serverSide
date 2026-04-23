@@ -9,6 +9,7 @@ export interface IUser extends Document {
   age?: number;
   height?: number;
   weight?: number;
+  targetWeight?: number;
   goal?: string;
   experience?: string;
   trainingDays?: string[];

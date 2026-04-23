@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema<IUser>({
   age: { type: Number },
   height: { type: Number },
   weight: { type: Number },
+  targetWeight: { type: Number },
   goal: { type: String },
   image: { type: String },
   experience: { type: String },

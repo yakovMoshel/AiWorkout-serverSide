@@ -99,7 +99,9 @@ Include exactly 3 suggestions per meal.`;
     throw new Error('Failed to parse nutrition plan from GPT');
   }
 
-  await User.findByIdAndUpdate(userId, { $set: { nutritionPlan } });
+  const updateFields: Record<string, any> = { nutritionPlan };
+  if (targetWeight != null) updateFields.targetWeight = targetWeight;
+  await User.findByIdAndUpdate(userId, { $set: updateFields });
 
   return { ...user.toObject(), nutritionPlan } as IUser;
 }
