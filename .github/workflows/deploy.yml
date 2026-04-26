@@ -76,6 +76,9 @@ jobs:
           GOOGLE_REDIRECT_URI_DEV: ${{ secrets.GOOGLE_REDIRECT_URI_DEV }}
           GOOGLE_REDIRECT_URI_PROD: ${{ secrets.GOOGLE_REDIRECT_URI_PROD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_EMAIL: ${{ secrets.VAPID_EMAIL }}
         run: |
           cat > .env <<EOF
           MONGO_URI=$MONGO_URI
@@ -91,6 +94,9 @@ jobs:
           GOOGLE_REDIRECT_URI_PROD=$GOOGLE_REDIRECT_URI_PROD
           NODE_ENV=production
           OPENAI_API_KEY=$OPENAI_API_KEY
+          VAPID_PUBLIC_KEY=$VAPID_PUBLIC_KEY
+          VAPID_PRIVATE_KEY=$VAPID_PRIVATE_KEY
+          VAPID_EMAIL=$VAPID_EMAIL
           EOF
 
       - name: Set up SSH key

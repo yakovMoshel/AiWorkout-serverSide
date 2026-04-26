@@ -14,16 +14,25 @@ import profileRoutes from './routes/profile';
 import googleRoutes from './routes/google';
 import aiRoutes from './routes/chatAi';
 import exerciseRoutes from './routes/exercise';
+import pushRoutes from './routes/push';
 
 import { connectToMongoDB } from './api/utils/ConnectToMongo';
 import corsOptions from './configs/corsOptions';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import cookieParser from 'cookie-parser';
+import webpush from 'web-push';
+import { startWorkoutReminderCron } from './cron/workoutReminder';
 
 
 export const app = express();
   const PORT = Number(process.env.PORT) || 5000;
+
+webpush.setVapidDetails(
+  process.env.VAPID_EMAIL!,
+  process.env.VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
+);
 
 
 app.set('trust proxy', 1);
@@ -55,12 +64,14 @@ app.use('/profile', profileRoutes);
 app.use('/google', googleRoutes);
 app.use('/ai', aiRoutes);
 app.use('/exercise', exerciseRoutes);
+app.use('/push', pushRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 if (process.env.NODE_ENV !== "test") {
   connectToMongoDB().then(() => {
+    startWorkoutReminderCron();
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);

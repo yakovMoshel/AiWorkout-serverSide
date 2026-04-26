@@ -30,9 +30,11 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.0",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
     "openai": "^6.22.0",
     "path-to-regexp": "^8.2.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
@@ -44,7 +46,9 @@
     "@types/mongoose": "^5.11.97",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.15.19",
+    "@types/node-cron": "^3.0.11",
     "@types/supertest": "^6.0.3",
+    "@types/web-push": "^3.6.4",
     "@vitest/ui": "^3.2.4",
     "cross-env": "^10.0.0",
     "mongodb-memory-server": "^10.4.1",
