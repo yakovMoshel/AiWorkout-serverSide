@@ -26,7 +26,7 @@ import { startWorkoutReminderCron } from './cron/workoutReminder';
 
 
 export const app = express();
-  const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
 webpush.setVapidDetails(
   process.env.VAPID_EMAIL!,
@@ -73,9 +73,9 @@ if (process.env.NODE_ENV !== "test") {
   connectToMongoDB().then(() => {
     startWorkoutReminderCron();
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
 
   });
 }
