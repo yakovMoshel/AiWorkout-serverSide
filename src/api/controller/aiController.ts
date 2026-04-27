@@ -13,6 +13,7 @@ export async function handleAiChat(req: Request, res: Response) {
     }
 
     const userId = (req as any).user?.id;
+    console.log(userId);
     const user = await User.findById(userId);
 
     if (!user) {
