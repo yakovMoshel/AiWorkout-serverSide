@@ -70,11 +70,30 @@ export async function generateWorkoutPlan(
   const days = workoutPlan?.result?.exercises ?? workoutPlan?.exercises;
 
   if (days) {
+    const allExercises = await Exercise.find({});
+
+    const normalize = (s: string) =>
+      s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+    const findMatch = (apiName: string) => {
+      const normApi = normalize(apiName);
+
+      // 1. exact (case-insensitive)
+      const exact = allExercises.find(e => normalize(e.name) === normApi);
+      if (exact) return exact;
+
+      // 2. DB name is a substring of the API name ("Push-Ups" ⊂ "Push-Ups (Modified if needed)")
+      const dbInApi = allExercises.find(e => normApi.includes(normalize(e.name)));
+      if (dbInApi) return dbInApi;
+
+      // 3. API name is a substring of DB name
+      const apiInDb = allExercises.find(e => normalize(e.name).includes(normApi));
+      return apiInDb ?? null;
+    };
+
     for (const day of days) {
       for (const exercise of day.exercises) {
-        const found = await Exercise.findOne({
-          name: { $regex: new RegExp(`^${exercise.name}$`, 'i') }
-        });
+        const found = findMatch(exercise.name);
         if (!found) continue;
 
         if (!found.imageBase64) {
