@@ -1,10 +1,11 @@
 import { CorsOptions } from 'cors';
 
 const allowedOrigins = [
-  // Production (Amplify)
-  process.env.FRONTEND_PROD || 'https://main.d2xdu67sdghkgu.amplifyapp.com',
-  'https://main.d2xdu67sdghkgu.amplifyapp.com',
-  
+  // Production
+  process.env.FRONTEND_PROD || 'https://www.ai-workout.co.il',
+  'https://www.ai-workout.co.il',
+  'https://ai-workout.co.il',
+
   // Development (Local)
   process.env.FRONTEND_DEV || 'http://localhost:3000',
   'http://localhost:3000',
