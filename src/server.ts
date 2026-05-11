@@ -41,7 +41,18 @@ app.set('trust proxy', 1);
 app.use(cors(corsOptions) as RequestHandler);
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", process.env.SERVER_URL || ""],
+        connectSrc: ["'self'", process.env.FRONTEND_PROD || "", process.env.FRONTEND_DEV || ""],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+      },
+    },
   })
 );
 
