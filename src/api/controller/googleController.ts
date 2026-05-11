@@ -28,7 +28,10 @@ export const googleCallback = async (req: Request, res: Response): Promise<void>
         const userId = user.id;
 
         await handleGoogleCallback(code, userId);
-        res.redirect('/settings?google=connected');
+        const frontendUrl = process.env.NODE_ENV === 'production'
+          ? process.env.FRONTEND_PROD
+          : process.env.FRONTEND_DEV;
+        res.redirect(`${frontendUrl}/profile?google=connected`);
     } catch (err) {
         console.error('OAuth callback error:', err);
         res.status(500).send('OAuth failed');
