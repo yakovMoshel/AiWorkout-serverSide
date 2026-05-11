@@ -13,13 +13,11 @@ export const register: RequestHandler = async (req, res, next) => {
   try {
     const { email, password, name } = req.body;
     const { user, token } = await registerUser(email, password, name);
-    console.log(req.body)
     sendTokenAsCookie(res, token);
     res.status(201).json({
       message: 'User registered successfully',
       user: { email: user.email, name: user.name },
     });
-    console.log(user);
   } catch (err: any) {
   const status = err.status || 500;
   res.status(status).json({ message: err.message });
