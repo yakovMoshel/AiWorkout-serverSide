@@ -81,8 +81,8 @@ describe('Auth Flow with Validation', () => {
       .post('/auth/login')
       .send({ email: 'notfound@example.com', password: 'Test12345' });
 
-    expect(res.status).toBe(422);
-    expect(res.body.errors[0].msg).toBe('E-Mail not found.');
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('message', 'Invalid credentials');
   });
 
   it('should get authenticated user with valid token', async () => {
