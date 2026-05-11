@@ -63,7 +63,8 @@ export async function getUserFromToken(token: string) {
     height: user.height,
     weight: user.weight,
     image: user.image,
-    profileComplete: !!user.workoutPlan
+    profileComplete: !!user.workoutPlan,
+    aiUsage: user.aiUsage ?? 0,
   };
 }
 
