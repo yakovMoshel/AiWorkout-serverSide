@@ -1,19 +1,26 @@
 import { Request, Response } from 'express';
 import { createAiChatReply } from '../services/aiService';
-import User from '../models/User'; // ה-model שלך
+import User from '../models/User';
 
 const AI_LIMIT = 10;
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export async function handleAiChat(req: Request, res: Response) {
   try {
-    const { message } = req.body as { message?: string };
+    const { message, history } = req.body as {
+      message?: string;
+      history?: ChatMessage[];
+    };
 
     if (!message || message.trim().length === 0) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
     const userId = (req as any).user?.id;
-    console.log(userId);
     const user = await User.findById(userId);
 
     if (!user) {
@@ -25,7 +32,17 @@ export async function handleAiChat(req: Request, res: Response) {
       return res.status(403).json({ error: 'Free AI messages finished. Upgrade soon 😉' });
     }
 
-    const reply = await createAiChatReply(message.trim());
+    const safeHistory: ChatMessage[] = Array.isArray(history)
+      ? history
+          .filter(
+            (m) =>
+              (m.role === 'user' || m.role === 'assistant') &&
+              typeof m.content === 'string'
+          )
+          .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) }))
+      : [];
+
+    const reply = await createAiChatReply(message.trim(), safeHistory);
 
     user.aiUsage = aiUsage + 1;
     await user.save();
