@@ -3,7 +3,6 @@ import multer from 'multer';
 import path from 'path';
 
 export const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    console.log("UPLOAD FILE:", file.mimetype, file.originalname); // debug
     if (file.mimetype.startsWith("image/")) {
         cb(null, true);
     } else {

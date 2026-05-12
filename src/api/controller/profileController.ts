@@ -17,8 +17,6 @@ export async function updateProfile(req: Request, res: Response) {
     if (weight) update.weight = weight;
     if (goal) update.goal = goal;
     if (imageUrl) update.image = imageUrl;
-    console.log("SERVER_URL:", process.env.SERVER_URL); // ← הוסף
-    console.log("imageUrl:", imageUrl); // ← הוסף
     const user = await User.findByIdAndUpdate(userId, update, { new: true });
 
     if (!user) return res.status(404).json({ message: 'User not found' });
