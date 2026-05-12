@@ -56,6 +56,7 @@ export async function getUserFromToken(token: string) {
   user.image = `${process.env.SERVER_URL}${user.image}`;
 }
   return {
+    id: user._id.toString(),
     name: user.name,
     email: user.email,
     age: user.age,
