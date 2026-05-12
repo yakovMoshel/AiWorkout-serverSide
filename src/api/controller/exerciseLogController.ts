@@ -13,18 +13,19 @@ export async function logExercise(req: Request, res: Response) {
     return;
   }
 
+  const normalizedName = exerciseName.toLowerCase();
   const sessionPr = Math.max(...sets.map((s) => s.weight));
 
-  const existing = await ExerciseLog.findOne({ userId, exerciseName }).sort({ date: -1 });
+  const existing = await ExerciseLog.findOne({ userId, exerciseName: normalizedName }).sort({ date: -1 });
   const newPr = existing ? Math.max(existing.pr, sessionPr) : sessionPr;
 
-  const log = await ExerciseLog.create({ userId, exerciseName, sets, pr: newPr });
+  const log = await ExerciseLog.create({ userId, exerciseName: normalizedName, sets, pr: newPr });
   res.status(201).json({ log, pr: newPr });
 }
 
 export async function getExerciseLog(req: Request, res: Response) {
   const userId = (req as any).user?.id;
-  const exerciseName = decodeURIComponent(req.params.exerciseName);
+  const exerciseName = decodeURIComponent(req.params.exerciseName).toLowerCase();
 
   const log = await ExerciseLog.findOne({ userId, exerciseName }).sort({ date: -1 });
   res.json({ sets: log?.sets ?? [], pr: log?.pr ?? 0 });
