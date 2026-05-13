@@ -3,7 +3,7 @@ import { IUser } from "../types/user";
 
 const userSchema = new mongoose.Schema<IUser>({
   _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 
