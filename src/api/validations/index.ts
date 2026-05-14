@@ -5,13 +5,13 @@ export const signupValidation = [
   body("email")
     .isEmail()
     .withMessage("Please enter a valid email.")
+    .normalizeEmail()
     .custom(async (value) => {
       const userDoc = await User.findOne({ email: value });
       if (userDoc) {
         return Promise.reject("E-Mail exists already, please pick a different one.");
       }
-    })
-    .normalizeEmail(),
+    }),
   body("password")
     .trim()
     .isLength({ min: 8 })
