@@ -75,6 +75,7 @@ export async function getUserFromToken(token: string) {
     image: user.image,
     profileComplete: !!user.workoutPlan,
     aiUsage: user.aiUsage ?? 0,
+    googleConnected: !!user.googleTokens?.access_token,
   };
 }
 
