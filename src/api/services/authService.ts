@@ -17,7 +17,16 @@ export async function registerUser(
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = new User({ email, password: hashedPassword, name });
-  await user.save();
+  try {
+    await user.save();
+  } catch (err: any) {
+    if (err.code === 11000) {
+      const dupError: any = new Error("Email already exists");
+      dupError.status = 400;
+      throw dupError;
+    }
+    throw err;
+  }
 
   const token = generateToken(user);
   return { user, token };
