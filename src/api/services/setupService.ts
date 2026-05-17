@@ -75,20 +75,48 @@ export async function generateWorkoutPlan(
     const normalize = (s: string) =>
       s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 
+    const words = (s: string) => new Set(normalize(s).split(' ').filter(w => w.length > 1));
+
     const findMatch = (apiName: string) => {
       const normApi = normalize(apiName);
+      const apiWords = words(apiName);
 
       // 1. exact (case-insensitive)
       const exact = allExercises.find(e => normalize(e.name) === normApi);
       if (exact) return exact;
 
-      // 2. DB name is a substring of the API name ("Push-Ups" ⊂ "Push-Ups (Modified if needed)")
+      // 2. DB name is a substring of the API name
       const dbInApi = allExercises.find(e => normApi.includes(normalize(e.name)));
       if (dbInApi) return dbInApi;
 
       // 3. API name is a substring of DB name
       const apiInDb = allExercises.find(e => normalize(e.name).includes(normApi));
-      return apiInDb ?? null;
+      if (apiInDb) return apiInDb;
+
+      // 4. all DB words appear in API name (e.g. "Sit Ups" ↔ "Abdominal Sit Ups")
+      const dbAllInApi = allExercises.find(e => {
+        const dbWords = words(e.name);
+        return dbWords.size > 0 && [...dbWords].every(w => apiWords.has(w));
+      });
+      if (dbAllInApi) return dbAllInApi;
+
+      // 5. all API words appear in DB name
+      const apiAllInDb = allExercises.find(e => {
+        const dbWords = words(e.name);
+        return apiWords.size > 0 && [...apiWords].every(w => dbWords.has(w));
+      });
+      if (apiAllInDb) return apiAllInDb;
+
+      // 6. best word overlap (≥ 60% of the larger set must match)
+      let bestMatch: typeof allExercises[0] | null = null;
+      let bestScore = 0;
+      for (const e of allExercises) {
+        const dbWords = words(e.name);
+        const common = [...apiWords].filter(w => dbWords.has(w)).length;
+        const score = common / Math.max(apiWords.size, dbWords.size);
+        if (score > bestScore) { bestScore = score; bestMatch = e; }
+      }
+      return bestScore >= 0.6 ? bestMatch : null;
     };
 
     for (const day of days) {
