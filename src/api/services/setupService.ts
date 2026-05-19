@@ -6,6 +6,30 @@ import User from '../models/User';
 import { IUser } from '../types/user';
 import Exercise from '../models/Exercise';
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function callWithRetry(options: object, maxRetries = 3): Promise<any> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await axios.request(options);
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const msg = (err?.message || '') + (err?.response?.data?.message || '');
+      const isRateLimit = status === 429 || msg.toLowerCase().includes('rate limit');
+
+      if (!isRateLimit || attempt === maxRetries) {
+        if (isRateLimit) {
+          throw new Error('Service is temporarily busy due to high demand. Please try again in a few minutes.');
+        }
+        throw err;
+      }
+
+      console.log(`RapidAPI rate limit hit (attempt ${attempt}/${maxRetries}). Retrying in 65 seconds...`);
+      await sleep(65_000);
+    }
+  }
+}
+
 interface SetupFormInput {
   gender: string;
   age: number;
@@ -64,7 +88,7 @@ export async function generateWorkoutPlan(
     },
   };
 
-  const response = await axios.request(options);
+  const response = await callWithRetry(options);
   const workoutPlan = response.data;
 
   const days = workoutPlan?.result?.exercises ?? workoutPlan?.exercises;
