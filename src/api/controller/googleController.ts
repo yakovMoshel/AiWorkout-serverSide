@@ -45,9 +45,13 @@ export const createWorkoutEvents = async (req: Request, res: Response) => {
         res.json(result);
     } catch (err) {
         console.error('Create recurring events error:', err);
-        res.status(500).json({
-            message: 'Failed to create events',
-            error: err instanceof Error ? err.message : 'Unknown error'
-        });
+        const message = err instanceof Error ? err.message : 'Unknown error';
+
+        if (message === 'User has no Google tokens') {
+            res.status(401).json({ message: 'Google not connected' });
+            return;
+        }
+
+        res.status(500).json({ message: 'Failed to create events', error: message });
     }
 };

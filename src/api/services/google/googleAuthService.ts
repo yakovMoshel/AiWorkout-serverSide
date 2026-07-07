@@ -8,7 +8,6 @@ export const generateGoogleAuthUrl = (): string => {
         access_type: 'offline',
         prompt: 'consent',
         scope: ['https://www.googleapis.com/auth/calendar'],
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI_PROD,
     });
 
     return url;

@@ -24,8 +24,19 @@ export async function getOAuthClientForUser(userId: string) {
   }
 
   const oauthClient = getOAuthClient();
-
   oauthClient.setCredentials(user.googleTokens);
+
+  // Auto-save refreshed tokens back to DB
+  oauthClient.on('tokens', async (tokens) => {
+    const merged = { ...user.googleTokens, ...tokens };
+    await User.findByIdAndUpdate(userId, { googleTokens: merged });
+  });
+
+  // Proactively refresh if access token is expired or missing
+  const expiry = user.googleTokens.expiry_date;
+  if (!expiry || expiry < Date.now()) {
+    await oauthClient.refreshAccessToken();
+  }
 
   return oauthClient;
 }
