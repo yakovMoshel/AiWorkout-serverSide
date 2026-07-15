@@ -12,12 +12,10 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
       - run: npm ci
       - run: npm run lint
 
@@ -25,12 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
       - run: npm ci
       - run: npm run test
 
@@ -39,28 +35,29 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
       - run: npm ci
       - run: npm run build
 
       - uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: build-artifact
+          path: |
+            dist/
+            package.json
+            package-lock.json
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: build-artifact
 
       - name: Create .env file
         env:
@@ -106,25 +103,41 @@ jobs:
 
       - name: Deploy to EC2
         run: |
+          # העלאת הקבצים הנדרשים בלבד
           scp -o StrictHostKeyChecking=no -i private_key.pem -r dist ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/aiworkout-server/
           scp -o StrictHostKeyChecking=no -i private_key.pem .env ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/aiworkout-server/
+          scp -o StrictHostKeyChecking=no -i private_key.pem package.json ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/aiworkout-server/
+          scp -o StrictHostKeyChecking=no -i private_key.pem package-lock.json ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/aiworkout-server/
 
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<'EOF'
-            set -ex
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_HOST }} <<'ENDSSH'
+            set -e
             cd /home/ec2-user/aiworkout-server
 
             echo "📦 Installing production dependencies..."
             npm ci --omit=dev
 
-            echo "🚀 Installing PM2 if needed..."
+            echo "🚀 Ensuring PM2 is installed..."
             command -v pm2 >/dev/null 2>&1 || npm install -g pm2
 
-            echo "🔄 Restarting server..."
+            echo "🔄 Restarting server with zero downtime..."
             if pm2 list | grep -q aiworkout-server; then
-              pm2 restart aiworkout-server --update-env
+              pm2 reload aiworkout-server --update-env
             else
               pm2 start dist/server.js --name "aiworkout-server"
             fi
 
+            pm2 save
+
             echo "✅ Deployment complete!"
-          EOF
+          ENDSSH
+
+      - name: Verify deployment
+        run: |
+          sleep 10
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://api-aiworkout.co.il/auth/user || echo "000")
+          if [ "$response" = "401" ] || [ "$response" = "200" ]; then
+            echo "✅ Server is responding (HTTP $response)"
+          else
+            echo "❌ Server health check failed (HTTP $response)"
+            exit 1
+          fi
