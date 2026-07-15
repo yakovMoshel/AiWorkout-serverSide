@@ -35,6 +35,9 @@ export async function getOAuthClientForUser(userId: string) {
   // Proactively refresh if access token is expired or missing
   const expiry = user.googleTokens.expiry_date;
   if (!expiry || expiry < Date.now()) {
+    if (!user.googleTokens.refresh_token) {
+      throw new Error('User has no Google tokens');
+    }
     await oauthClient.refreshAccessToken();
   }
 
