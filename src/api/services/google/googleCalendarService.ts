@@ -57,7 +57,7 @@ export const createWorkoutEventsService = async (req: Request) => {
         const [hours, minutes] = selectedTime.split(':').map(Number);
 
         const targetDayNumber = dayToNumber[fullDay];
-        const nextDate = getNextDayOfWeek(new Date(), targetDayNumber);
+        const nextDate = getNextDayOfWeek(new Date(), targetDayNumber, hours, minutes);
         const totalDuration = calculateTotalDuration(dayWorkout.exercises);
         const description = formatWorkoutDescription(dayWorkout.exercises);
 
@@ -65,15 +65,21 @@ export const createWorkoutEventsService = async (req: Request) => {
         endDate.setDate(endDate.getDate() + (weeksCount * 7));
         const untilDate = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
+        // Format as local datetime string (no Z) so Google Calendar applies timeZone correctly
+        const toLocalISO = (d: Date) => {
+            const pad = (n: number) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+        };
+
         const event = {
             summary: `💪 ${fullDay} - ${getFocusArea(dayWorkout.exercises)}`,
             description: description,
             start: {
-                dateTime: nextDate.toISOString(),
+                dateTime: toLocalISO(nextDate),
                 timeZone: 'Asia/Jerusalem',
             },
             end: {
-                dateTime: new Date(nextDate.getTime() + totalDuration * 60 * 1000).toISOString(),
+                dateTime: toLocalISO(new Date(nextDate.getTime() + totalDuration * 60 * 1000)),
                 timeZone: 'Asia/Jerusalem',
             },
             recurrence: [
