@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { logExercise, getExerciseLog } from '../api/controller/exerciseLogController';
+import { logExercise, getExerciseLog, getLastExerciseLog } from '../api/controller/exerciseLogController';
 import { authenticate } from '../middleware/auth';
 import { exerciseLogValidation } from '../api/validations';
 import { validationResult } from 'express-validator';
@@ -21,6 +21,10 @@ router.post('/log', authenticate, exerciseLogValidation, validate, (req: Request
 
 router.get('/log/:exerciseName', authenticate, (req, res, next) => {
   Promise.resolve(getExerciseLog(req, res)).catch(next);
+});
+
+router.get('/log/:exerciseName/last', authenticate, (req, res, next) => {
+  Promise.resolve(getLastExerciseLog(req, res)).catch(next);
 });
 
 export default router;

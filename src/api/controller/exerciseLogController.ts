@@ -30,3 +30,11 @@ export async function getExerciseLog(req: Request, res: Response) {
   const log = await ExerciseLog.findOne({ userId, exerciseName }).sort({ date: -1 });
   res.json({ sets: log?.sets ?? [], pr: log?.pr ?? 0 });
 }
+
+export async function getLastExerciseLog(req: Request, res: Response) {
+  const userId = (req as any).user?.id;
+  const exerciseName = decodeURIComponent(req.params.exerciseName).toLowerCase();
+
+  const log = await ExerciseLog.findOne({ userId, exerciseName }).sort({ date: -1 });
+  res.json({ sets: log?.sets ?? [], date: log?.date ?? null, pr: log?.pr ?? 0 });
+}
